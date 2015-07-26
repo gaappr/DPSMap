@@ -654,8 +654,8 @@ var SMSMap = {
          {
             city:"Southhampton",
             state:undefined,
-            lat:50.8995249,
-            long:50.8995249,
+            lat:50.919458,
+            long:-1.399463,
             country:"UK",
             companies:[]
         },
@@ -829,12 +829,14 @@ var SMSMap = {
         }
   
      ],
-    
+    filteredArray:[],
     /**
     *   initiateMap
     *   Called initially to setup the map - there will be no points on the map initially
     **/
     initiateMap: function(){
+        SMSMap.filteredArray = SMSMap.coopData;
+        SMSMap.drawControls();
         $('#smsMap').gmap(
             {   'zoom' : 3,
                 'center': '38.611563, -98.545487',
@@ -850,9 +852,9 @@ var SMSMap = {
     **/
     drawMap:function(){
         $('#smsMap').gmap().bind('init', function() {
-            for(var i=0; i<SMSMap.coopData.length; i++){
+            for(var i=0; i<SMSMap.filteredArray.length; i++){
                 //Retrieve marker info due to the deferred callback below
-                SMSMap.drawPoint( SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i );
+                SMSMap.drawPoint( SMSMap.filteredArray[i].lat, SMSMap.filteredArray[i].long, i );
             }
         });
     },
@@ -912,15 +914,15 @@ var SMSMap = {
         infoDiv.appendChild(SMSMap.createInfoClose());
         infoDiv.appendChild(SMSMap.createCityName(arrayLoc));
         
-        if( SMSMap.coopData[arrayLoc].companies.length > 0 ){
-            for( var i=0; i<SMSMap.coopData[arrayLoc].companies.length; i++ ){
+        if( SMSMap.filteredArray[arrayLoc].companies.length > 0 ){
+            for( var i=0; i<SMSMap.filteredArray[arrayLoc].companies.length; i++ ){
                 var companyLink = document.createElement("a");
-                companyLink.href = SMSMap.coopData[arrayLoc].companies[i].website;
+                companyLink.href = SMSMap.filteredArray[arrayLoc].companies[i].website;
                 companyLink.style.textDecoration = "none";
                 companyLink.style.color = SMSMap.textColor;
                 companyLink.style.fontSize = "30px";
                 companyLink.style.textAlign = "center";
-                companyLink.appendChild(document.createTextNode(SMSMap.coopData[arrayLoc].companies[i].name));
+                companyLink.appendChild(document.createTextNode(SMSMap.filteredArray[arrayLoc].companies[i].name));
                 companyLink.style.display = "block";
                 SMSMap.addTextTouchEffect( companyLink );
                 infoDiv.appendChild(companyLink);
@@ -946,9 +948,9 @@ var SMSMap = {
     **/
     createCityName:function(arrayLoc){
         var cityName = document.createElement("h1");
-        var city = SMSMap.coopData[arrayLoc].city;
-        var state = SMSMap.coopData[arrayLoc].state;
-        var country = SMSMap.coopData[arrayLoc].country;
+        var city = SMSMap.filteredArray[arrayLoc].city;
+        var state = SMSMap.filteredArray[arrayLoc].state;
+        var country = SMSMap.filteredArray[arrayLoc].country;
         var cityString = city;
         if( state ){
             cityString += ", " + state;   
@@ -1000,5 +1002,71 @@ var SMSMap = {
         el.ontouchend = function(){
             el.style.color = SMSMap.textColor;   
         }
-    }
+    },
+    
+    /**
+    *   filterStates
+    *   filters the coopData based on an input string
+    *
+    *   @param stateString - the state abbreviation you would like to filter.
+    **/
+    filterStates:function(stateString){
+        SMSMap.filteredArray = [];
+        for(i=0; i<SMSMap.coopData.length; i++){
+            if(SMSMap.coopData[i].state == stateString){
+                SMSMap.filteredArray.push(SMSMap.coopData[i]);  
+            }
+        }
+    },
+    
+    /**
+    *   drawControls
+    *   Creates the control div and adds the necessary filters that we need
+    **/
+    drawControls:function(){
+        var controlDiv = document.createElement("div");
+        controlDiv.id = "controls";
+        controlDiv.style.width = "100%";
+        controlDiv.style.height = "10%";
+        controlDiv.style.backgroundColor = SMSMap.backgroundColor;
+        controlDiv.style.position = "absolute";
+        controlDiv.style.bottom = "0px";
+        controlDiv.style.zIndex = "100";
+        var stateFilter = document.createElement("select");
+        
+        var states = SMSMap.createStateList();
+        var stateSelect;
+        for(i=0; i<states.length; i++){
+            stateSelect = document.createElement("option");
+            stateSelect.value = states[i];
+            stateSelect.appendChild( document.createTextNode( states[i] ) );
+            stateFilter.appendChild( stateSelect );
+        }
+        stateFilter.onchange = function(){
+            SMSMap.filterStates( stateFilter.options[stateFilter.selectedIndex].value );
+            SMSMap.drawMap();
+        }
+        controlDiv.appendChild( stateFilter );
+        document.getElementById("wrapper").appendChild(controlDiv);
+    },
+    
+    /**
+    *   createStateList
+    *   Creates the dropdown list of states based on which states are in the data.
+    **/
+    createStateList:function(){
+        var stateArray = [];
+        stateArray.push("All");
+        for(i=0; i<SMSMap.coopData.length; i++){
+            if( stateArray.indexOf(SMSMap.coopData[i].state) === -1 && SMSMap.coopData[i].state != undefined){
+                stateArray.push(SMSMap.coopData[i].state);
+            }
+        }
+        stateArray.sort();
+        return stateArray;
+    },
+    
+//    refreshMap:function(){
+//        google.maps.event.trigger();
+//    }
 }

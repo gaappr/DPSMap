@@ -649,7 +649,7 @@
             city:"Southhampton",
             state:undefined,
             lat:50.8995249,
-            long:50.8995249,
+            long:-1.399463,
             country:"UK",
             companies:[]
         },
