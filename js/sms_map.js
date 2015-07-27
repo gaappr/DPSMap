@@ -2,6 +2,8 @@ var SMSMap = {
     backgroundColor: "rgba(0,0,0,0.75)",
     textColor: "white",
     effectColor: "#777777",
+    
+    //Change the following two objects when a new image is added
     mapIcon: {
         'url': './images/dot.png',
         'size': new google.maps.Size(30, 30),
@@ -12,6 +14,10 @@ var SMSMap = {
         'coords': [19, 5, 19, 29, 11, 19, 4, 25, 25, 47, 45, 25, 39, 19, 29, 28, 30, 4, 19, 4],
         'type': 'poly'
     },
+    
+    //This is an array that will be used to keep track of the points in the map
+    mapPoints:[],
+    
     //Note: change this to whatever data is required for the map to function
     coopData: [
         {
@@ -881,13 +887,15 @@ var SMSMap = {
      *   @param arrayLocation - the location in the coopArray you are pulling this point from
      **/
     drawPoint: function (lat, long, arrayLocation) {
-        $('#smsMap').gmap('addMarker', {
+        var point = {
             'position': lat + "," + long,
             'bounds': false,
             'animation': google.maps.Animation.DROP,
             'icon': SMSMap.mapIcon,
             //            'shape':SMSMap.mapShape
-        }).click(function () {
+        };
+        SMSMap.mapPoints.push( point );
+        $('#smsMap').gmap('addMarker', point).click(function () {
             SMSMap.drawInfoDiv(arrayLocation);
         });
     },
