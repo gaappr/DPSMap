@@ -15,6 +15,8 @@ var SMSMap = {
         'type': 'poly'
     },
     
+    map:{},
+    
     //This is an array that will be used to keep track of the points in the map
     mapPoints:[],
     
@@ -846,7 +848,6 @@ var SMSMap = {
      ],
     mapStyle: [{"featureType":"all","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f2f2f2"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#34495e"},{"visibility":"on"}]}],
 
-    filteredArray: [],
     /**
      *   initiateMap
      *   Called initially to setup the map - there will be no points on the map initially
@@ -854,14 +855,16 @@ var SMSMap = {
     initiateMap: function () {
         SMSMap.filteredArray = SMSMap.coopData;
         SMSMap.drawControls();
-        $('#smsMap').gmap({
+        var mapOptions = {
             'zoom': 3,
-            'center': '38.611563, -98.545487',
+            'center': new google.maps.LatLng(38.611563, -98.545487),
             'mapTypeControl': false,
             'navigationControl': false,
             'streetViewControl': false,
             'styles': SMSMap.mapStyle
-        });
+        };
+        SMSMap.map = new google.maps.Map(document.getElementById('smsMap'),
+      mapOptions);
     },
 
     /**
@@ -869,35 +872,43 @@ var SMSMap = {
      *   parses through the coopData array and adds points to the map with the help of the drawPoint function.
      **/
     drawMap: function () {
-        $('#smsMap').gmap().bind('init', function () {
-            for (var i = 0; i < SMSMap.filteredArray.length; i++) {
-                //Retrieve marker info due to the deferred callback below
-                SMSMap.drawPoint(SMSMap.filteredArray[i].lat, SMSMap.filteredArray[i].long, i);
-            }
-        });
+        for (var i = 0; i < SMSMap.filteredArray.length; i++) {
+            //Retrieve marker info due to the deferred callback below
+            SMSMap.createPoint(SMSMap.filteredArray[i].lat, SMSMap.filteredArray[i].long, i, false);
+        }
+        SMSMap.drawPoints();
     },
 
     /**
-     *   drawPoint
+     *   createPoint
      *   This will actually draw a point on the map and add information about that point to the
      *   map. Also sets up an onclick listener to enable the viewing of the information in the map
      *
      *   @param lat - the latitude of the point you would like to draw
      *   @param long - the longitude of the point you would like to draw
      *   @param arrayLocation - the location in the coopArray you are pulling this point from
+     *   @param bounds - boolean indicating whether the points should be bounded into the map display or not.
      **/
-    drawPoint: function (lat, long, arrayLocation) {
+    createPoint: function (lat, long, arrayLocation, bounds) {
         var point = {
-            'position': lat + "," + long,
-            'bounds': false,
+            'position': new google.maps.LatLng(lat,long),
+            'bounds': bounds,
             'animation': google.maps.Animation.DROP,
             'icon': SMSMap.mapIcon,
-            //            'shape':SMSMap.mapShape
         };
-        SMSMap.mapPoints.push( point );
-        $('#smsMap').gmap('addMarker', point).click(function () {
+        var googlePoint = new google.maps.Marker( point );
+        
+        google.maps.event.addListener(googlePoint,'click',function(){
             SMSMap.drawInfoDiv(arrayLocation);
         });
+        
+        SMSMap.mapPoints.push( googlePoint );
+    },
+    
+    drawPoints: function(){
+        for( var i=0; i<SMSMap.filteredArray.length; i++ ){
+            SMSMap.mapPoints[i].setMap(SMSMap.map);   
+        }
     },
 
     /**
@@ -905,8 +916,9 @@ var SMSMap = {
      *   A utility function to set the size of the map relative to the size of the screen it is being displayed on.
      **/
     setWrapperSize: function () {
-        $("#wrapper").width($(window).width());
-        $("#wrapper").height($(window).height());
+        var wrapperDiv = document.getElementById("wrapper");
+        wrapper.style.width = window.innerWidth + "px";
+        wrapper.style.height = window.innerHeight + "px";
     },
 
     /**
@@ -921,8 +933,8 @@ var SMSMap = {
         infoDiv.id = "infoDiv";
 
         //All of the styling is done here
-        infoDiv.style.width = $(window).width() + "px";
-        infoDiv.style.height = $(window).height() + "px";
+        infoDiv.style.width = window.innerWidth + "px";
+        infoDiv.style.height = window.innerHeight + "px";
         infoDiv.style.position = "absolute";
         infoDiv.style.left = "0px";
         infoDiv.style.top = "0px";
@@ -1032,12 +1044,20 @@ var SMSMap = {
      *   @param stateString - the state abbreviation you would like to filter.
      **/
     filterStates: function (stateString) {
-        SMSMap.filteredArray = [];
+        SMSMap.clearMap();
+        //SMSMap.mapPoints = [];
         for (i = 0; i < SMSMap.coopData.length; i++) {
-            if (SMSMap.coopData[i].state == stateString) {
-                SMSMap.filteredArray.push(SMSMap.coopData[i]);
+            if (SMSMap.coopData[i].state == stateString || stateString == "All") {
+                SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
             }
         }
+    },
+    
+    clearMap: function(){
+        for( var i=0; i<SMSMap.mapPoints.length; i++ ){
+            SMSMap.mapPoints[i].setMap(null);
+        }
+        SMSMap.mapPoints = [];
     },
 
     /**
@@ -1066,7 +1086,7 @@ var SMSMap = {
         }
         stateFilter.onchange = function () {
             SMSMap.filterStates(stateFilter.options[stateFilter.selectedIndex].value);
-            SMSMap.refreshMap();
+            SMSMap.drawPoints();
         }
         controlDiv.appendChild(stateFilter);
         document.getElementById("wrapper").appendChild(controlDiv);
@@ -1088,7 +1108,4 @@ var SMSMap = {
         return stateArray;
     },
 
-    refreshMap: function () {
-        $('#smsMap').gmap('refresh');
-    }
 }
