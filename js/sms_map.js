@@ -78,7 +78,7 @@ var SMSMap = {
     },
 
     drawPoints: function(){
-        for( var i=0; i<SMSMap.filteredArray.length; i++ ){
+        for( var i=0; i<SMSMap.mapPoints.length; i++ ){
             SMSMap.mapPoints[i].setMap(SMSMap.map);
         }
     },
