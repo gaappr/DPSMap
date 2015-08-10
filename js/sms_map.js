@@ -5,10 +5,10 @@ var SMSMap = {
 
     //Change the following two objects when a new image is added
     mapIcon: {
-        'url': './images/dot.png',
-        'size': new google.maps.Size(30, 30),
+        'url': './images/p3b_green.png',
+        'size': new google.maps.Size(60, 60),
         'origin': new google.maps.Point(0, 0),
-        'anchor': new google.maps.Point(15, 15)
+        'anchor': new google.maps.Point(30, 60)
     },
     mapShape: {
         'coords': [19, 5, 19, 29, 11, 19, 4, 25, 25, 47, 45, 25, 39, 19, 29, 28, 30, 4, 19, 4],
