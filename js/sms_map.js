@@ -1,44 +1,94 @@
 var SMSMap = {
+
     backgroundColor: "rgba(0,0,0,0.75)",
     textColor: "white",
     effectColor: "#777777",
+    infoDivVisible: false,
+    pointClicked: false,
 
     //Change the following two objects when a new image is added
-    mapIcon: {
-        'url': './images/p3b_green.png',
-        'size': new google.maps.Size(60, 60),
-        'origin': new google.maps.Point(0, 0),
-        'anchor': new google.maps.Point(30, 60)
+    defaultIcon: {
+      'url': './images/p3b_green.png',
+      'size': new google.maps.Size(60, 60),
+      'origin': new google.maps.Point(0, 0),
+      'anchor': new google.maps.Point(30, 60)
+    },
+    selectedIcon: {
+      'url': './images/p3b_lightblue.png',
+      'size': new google.maps.Size(60, 60),
+      'origin': new google.maps.Point(0, 0),
+      'anchor': new google.maps.Point(30, 60)
     },
     mapShape: {
-        'coords': [19, 5, 19, 29, 11, 19, 4, 25, 25, 47, 45, 25, 39, 19, 29, 28, 30, 4, 19, 4],
-        'type': 'poly'
+      'coords': [19, 5, 19, 29, 11, 19, 4, 25, 25, 47, 45, 25, 39, 19, 29, 28, 30, 4, 19, 4],
+      'type': 'poly'
     },
+
 
     map:{},
 
+
     //This is an array that will be used to keep track of the points in the map
     mapPoints:[],
+
+
 
     /**
      *   initiateMap
      *   Called initially to setup the map - there will be no points on the map initially
      **/
     initiateMap: function () {
-        SMSMap.filteredArray = SMSMap.coopData;
-        SMSMap.drawControls();
-        var mapOptions = {
-            'zoom': 3,
-            'center': new google.maps.LatLng(38.611563, -98.545487),
-            'mapTypeControl': false,
-            'navigationControl': false,
-            'streetViewControl': false,
-            'styles': SMSMap.mapStyle,
-            'zoomControl': false,
-        };
-        SMSMap.map = new google.maps.Map(document.getElementById('smsMap'),
-      mapOptions);
+      SMSMap.filteredArray = SMSMap.coopData;
+      SMSMap.drawControls();
+
+      var mapOptions = {
+        'zoom': 3,
+        'center': new google.maps.LatLng(38.611563, -98.545487),
+        'mapTypeControl': false,
+        'navigationControl': false,
+        'streetViewControl': false,
+        'styles': SMSMap.mapStyle,
+        //'zoomControl': false,
+      };
+
+      SMSMap.map = new google.maps.Map(document.getElementById('sms-map'), mapOptions);
+      SMSMap.addListeners();
     },
+
+
+
+    addListeners: function(){
+      //zoom change event listener for entire map
+      google.maps.event.addListener(SMSMap.map, "zoom_changed", function(){
+        if(SMSMap.pointClicked){
+          SMSMap.map.setCenter(SMSMap.pointClicked.position);
+          SMSMap.map.panBy(0, -120);
+        }
+      });
+
+      //touch drag event listener for entire map
+      google.maps.event.addListener(SMSMap.map, "drag", function(){
+        SMSMap.hideInfo();
+      });
+    },
+
+
+
+    hideInfo: function(){
+      if(SMSMap.pointClicked){
+        SMSMap.pointClicked.setIcon(SMSMap.defaultIcon);
+      }
+
+      SMSMap.pointClicked = false;
+
+      if(SMSMap.infoDivVisible){
+        SMSMap.infoDiv.style.zIndex = -1;
+        SMSMap.infoDiv.style.opacity = 0;
+        SMSMap.infoDivVisible = false;
+      }
+    },
+
+
 
     /**
      *   drawMap
@@ -51,6 +101,8 @@ var SMSMap = {
         }
         SMSMap.drawPoints();
     },
+
+
 
     /**
      *   createPoint
@@ -67,28 +119,40 @@ var SMSMap = {
             'position': new google.maps.LatLng(lat,long),
             'bounds': bounds,
             'animation': google.maps.Animation.DROP,
-            'icon': SMSMap.mapIcon,
+            'icon': SMSMap.defaultIcon,
         };
         var googlePoint = new google.maps.Marker( point );
 
         google.maps.event.addListener(googlePoint,'click',function(){
-            var currentZoom = SMSMap.map.getZoom();
-            console.log(currentZoom);
+          var currentZoom = SMSMap.map.getZoom();
 
-            SMSMap.map.setZoom(currentZoom < 6 ? 6 : 10);
-            SMSMap.map.setCenter(point.position);
-            SMSMap.drawInfoDiv(arrayLocation);
+          if(SMSMap.pointClicked){
+            SMSMap.pointClicked.setIcon(SMSMap.defaultIcon);
+          }
 
+          SMSMap.pointClicked = this;
+          this.setIcon(SMSMap.selectedIcon);
+          this.setOpacity(50);
+
+          SMSMap.map.setZoom(currentZoom < 6 ? 6 : currentZoom);
+          SMSMap.map.setCenter(new google.maps.LatLng(lat, long));
+          SMSMap.map.panBy(0, -120);
+
+          SMSMap.drawInfoDiv(arrayLocation);
         });
 
-        SMSMap.mapPoints.push( googlePoint );
+        SMSMap.mapPoints.push(googlePoint);
     },
+
+
 
     drawPoints: function(){
         for( var i=0; i<SMSMap.mapPoints.length; i++ ){
             SMSMap.mapPoints[i].setMap(SMSMap.map);
         }
     },
+
+
 
     /**
      *   setWrapperSize
@@ -100,6 +164,8 @@ var SMSMap = {
         wrapper.style.height = window.innerHeight + "px";
     },
 
+
+
     /**
      *   drawInfoDiv
      *   Actually draws the information regarding each city. This function specifically handles the creation of
@@ -108,34 +174,33 @@ var SMSMap = {
      *   @param arrayLoc - The array location within coopData array that we are going to display on the screen
      **/
     drawInfoDiv: function (arrayLoc) {
-        var infoDiv = document.createElement("div");
-        infoDiv.id = "infoDiv";
+        //set reference to infoDiv as property of main object for later use
+        SMSMap.infoDiv = document.getElementById("info-div");
 
-        //All of the styling is done here
-        infoDiv.style.width = (window.innerWidth * .8)+ "px";
-        infoDiv.style.height = (window.innerHeight * .8) + "px";
-        infoDiv.style.position = "absolute";
-        infoDiv.style.left = (window.innerWidth * .1) + "px";
-        infoDiv.style.top = (window.innerWidth * .1) + "px";
-        infoDiv.style.zIndex = 100;
-        infoDiv.style.overflow = "scroll";
-        infoDiv.style.backgroundColor = SMSMap.backgroundColor;
-        infoDiv.style.color = SMSMap.textColor;
+        //make local variable to make shorter
+        var infoDiv = SMSMap.infoDiv;
 
-        //All of the content added to the div below
+        //make sure infoDiv is clear of any previously displayed content
+        infoDiv.innerHTML = "";
+
+        //make infoDiv visible (default css opacity is 0)
+        infoDiv.style.zIndex = 1;
+        infoDiv.style.opacity = 1;
+
+        //record the fact that infoDiv is now visible in the main object property
+        SMSMap.infoDivVisible = true;
+
         infoDiv.appendChild(SMSMap.createInfoClose());
         infoDiv.appendChild(SMSMap.createCityName(arrayLoc));
 
         if (SMSMap.filteredArray[arrayLoc].companies.length > 0) {
+
             for (var i = 0; i < SMSMap.filteredArray[arrayLoc].companies.length; i++) {
                 var companyLink = document.createElement("a");
+                companyLink.className = "company-link";
                 companyLink.href = SMSMap.filteredArray[arrayLoc].companies[i].website;
-                companyLink.style.textDecoration = "none";
-                companyLink.style.color = SMSMap.textColor;
-                companyLink.style.fontSize = "30px";
-                companyLink.style.textAlign = "center";
+
                 companyLink.appendChild(document.createTextNode(SMSMap.filteredArray[arrayLoc].companies[i].name));
-                companyLink.style.display = "block";
                 SMSMap.addTextTouchEffect(companyLink);
                 infoDiv.appendChild(companyLink);
             }
@@ -146,9 +211,9 @@ var SMSMap = {
                 "We're sorry, we can't find the company names, but someone did go on co-op in this city!"));
             infoDiv.appendChild(defaultPara);
         }
-
-        document.getElementById("wrapper").appendChild(infoDiv);
     },
+
+
 
     /**
      *   createCityName
@@ -174,33 +239,29 @@ var SMSMap = {
         return cityName;
     },
 
+
+
     /**
      *   createInfoClose
      *   Creates that button the will remove the infoDiv. This function also assigns and handles the necessary events
      *   associated with the close button.
      **/
     createInfoClose: function () {
-        var infoClose = document.createElement("div");
-        infoClose.style.width = "100%";
-        infoClose.style.position = "relative";
-        infoClose.style.top = "0px";
-        infoClose.style.left = "0px";
-        infoClose.style.marginBottom = "30px";
-
-        var closeButton = document.createElement("h2");
-        closeButton.appendChild(document.createTextNode("X"));
-        closeButton.style.textAlign = "right";
-        closeButton.style.marginRight = "10px";
+        var closeButton = document.createElement("div");
+        closeButton.id = "info-close";
 
         SMSMap.addTextTouchEffect(closeButton);
 
         closeButton.onclick = function () {
-            document.getElementById("wrapper").removeChild(document.getElementById("infoDiv"))
+            SMSMap.hideInfo();
         };
-        infoClose.appendChild(closeButton);
 
-        return infoClose;
+        SMSMap.infoDiv.appendChild(closeButton);
+
+        return closeButton;
     },
+
+
 
     /**
      *   addTextTouchEffect
@@ -213,11 +274,14 @@ var SMSMap = {
     addTextTouchEffect: function (el) {
         el.ontouchstart = function () {
             el.style.color = SMSMap.effectColor;
+            console.log("touch!!!");
         }
         el.ontouchend = function () {
             el.style.color = SMSMap.textColor;
         }
     },
+
+
 
     /**
      *   filterStates
@@ -227,27 +291,40 @@ var SMSMap = {
      **/
     filterStates: function (stateString) {
         SMSMap.clearMap();
+
         //SMSMap.mapPoints = [];
         for (i = 0; i < SMSMap.coopData.length; i++) {
             if (SMSMap.coopData[i].state == stateString || stateString == "All") {
                 SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
-
-                //console.log(SMSMap.coopData[i].lat + ", " + SMSMap.coopData[i].long);
             }
         }
 
         SMSMap.filterPosition(stateString);
-        //console.log(SMSMap.mapPoints);
     },
 
+
+
     clearMap: function(){
+        SMSMap.pointClicked = false;
+
+        SMSMap.hideInfo();
+
         for( var i=0; i<SMSMap.mapPoints.length; i++ ){
             SMSMap.mapPoints[i].setMap(null);
         }
+
         SMSMap.mapPoints = [];
     },
 
 
+
+    /**
+     * filterPosition
+     *   Changes the center and zoom of the map object based on the filter selection
+     *
+     * @param stateString - string, user filter selection (two letter state
+     *                      abreviation or "All" to include all points)
+     */
     filterPosition: function (stateString){
       var tempLat = 0;
       var tempLng = 0;
@@ -256,6 +333,7 @@ var SMSMap = {
         tempLat += SMSMap.mapPoints[i].position.G;
         tempLng += SMSMap.mapPoints[i].position.K;
       }
+
       avgLat = tempLat / SMSMap.mapPoints.length;
       avgLng = tempLng / SMSMap.mapPoints.length;
 
@@ -264,12 +342,10 @@ var SMSMap = {
         SMSMap.map.setZoom(3);
       }else{
         SMSMap.map.setCenter(new google.maps.LatLng(avgLat, avgLng));
-        SMSMap.map.setZoom(stateString == "All" ? 3 : 6);
+        SMSMap.map.setZoom(6);
       }
-
-
-
     },
+
 
 
     /**
@@ -279,12 +355,7 @@ var SMSMap = {
     drawControls: function () {
         var controlDiv = document.createElement("div");
         controlDiv.id = "controls";
-        controlDiv.style.width = "100%";
-        controlDiv.style.height = "10%";
-        controlDiv.style.backgroundColor = SMSMap.backgroundColor;
-        controlDiv.style.position = "absolute";
-        controlDiv.style.bottom = "0px";
-        controlDiv.style.zIndex = "100";
+
         var stateFilter = document.createElement("select");
         stateFilter.style.marginLeft = "10%";
 
@@ -297,15 +368,14 @@ var SMSMap = {
             stateFilter.appendChild(stateSelect);
         }
         stateFilter.onchange = function () {
-
-            console.log(stateFilter.options[stateFilter.selectedIndex].value);
-
             SMSMap.filterStates(stateFilter.options[stateFilter.selectedIndex].value);
             SMSMap.drawPoints();
         }
         controlDiv.appendChild(stateFilter);
         document.getElementById("wrapper").appendChild(controlDiv);
     },
+
+
 
     /**
      *   createStateList
@@ -322,6 +392,8 @@ var SMSMap = {
         stateArray.sort();
         return stateArray;
     },
+
+
 
     //Note: change this to whatever data is required for the map to function
     coopData: [
