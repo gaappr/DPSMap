@@ -3,21 +3,25 @@ var SMSMap = {
     backgroundColor: "rgba(0,0,0,0.75)",
     textColor: "white",
     effectColor: "#777777",
+    filterVisible: false,
     infoDivVisible: false,
     pointClicked: false,
 
+    pastFilteredStates: ["All"],
+    currentFilteredStates: [],
+
     //Change the following two objects when a new image is added
     defaultIcon: {
-      'url': './images/p3b_green.png',
-      'size': new google.maps.Size(60, 60),
+      'url': './images/p5_green.png',
+      'size': new google.maps.Size(32, 60),
       'origin': new google.maps.Point(0, 0),
-      'anchor': new google.maps.Point(30, 60)
+      'anchor': new google.maps.Point(16, 60)
     },
     selectedIcon: {
-      'url': './images/p3b_lightblue.png',
-      'size': new google.maps.Size(60, 60),
+      'url': './images/p5_lightblue.png',
+      'size': new google.maps.Size(32, 60),
       'origin': new google.maps.Point(0, 0),
-      'anchor': new google.maps.Point(30, 60)
+      'anchor': new google.maps.Point(16, 60)
     },
     mapShape: {
       'coords': [19, 5, 19, 29, 11, 19, 4, 25, 25, 47, 45, 25, 39, 19, 29, 28, 30, 4, 19, 4],
@@ -39,6 +43,7 @@ var SMSMap = {
      **/
     initiateMap: function () {
       SMSMap.filteredArray = SMSMap.coopData;
+
       SMSMap.drawControls();
 
       var mapOptions = {
@@ -52,12 +57,19 @@ var SMSMap = {
       };
 
       SMSMap.map = new google.maps.Map(document.getElementById('sms-map'), mapOptions);
-      SMSMap.addListeners();
+
+      //waits till document is loaded to call listener binding function
+      document.addEventListener("DOMContentLoaded", function(event) {
+        SMSMap.addListeners();
+      });
     },
 
 
 
     addListeners: function(){
+      var closeButton = document.getElementsByClassName("close");
+      var filterDisplayButton = document.getElementById("filter-display");
+
       //zoom change event listener for entire map
       google.maps.event.addListener(SMSMap.map, "zoom_changed", function(){
         if(SMSMap.pointClicked){
@@ -69,7 +81,43 @@ var SMSMap = {
       //touch drag event listener for entire map
       google.maps.event.addListener(SMSMap.map, "drag", function(){
         SMSMap.hideInfo();
+        if(SMSMap.filterVisible === true){
+          SMSMap.doFilter();
+        }
       });
+
+      //touch 'click' event listener that does the same as above for entire map
+      google.maps.event.addListener(SMSMap.map, "click", function(){
+        SMSMap.hideInfo();
+        if(SMSMap.filterVisible === true){
+          SMSMap.doFilter();
+        }
+      });
+
+      //SMSMap.addTextTouchEffect(closeButton);
+
+      for( var i = 0; i < closeButton.length; i++){
+        if(closeButton[i].className === "close info"){
+          console.log("brap");
+          closeButton[i].onclick = function () {
+            SMSMap.hideInfo();
+          };
+        }else{
+          console.log("bananas");
+          closeButton[i].onclick = function () {
+            SMSMap.doFilter();
+          };
+        }
+      }
+
+      filterDisplayButton.onclick = function() {
+        SMSMap.doFilter();
+        SMSMap.hideInfo();
+      }
+
+      //also save a reference to the filter display button and div for later use
+      SMSMap.filter = document.getElementById("filter");
+      SMSMap.filterDisplayButton = filterDisplayButton;
     },
 
 
@@ -82,9 +130,30 @@ var SMSMap = {
       SMSMap.pointClicked = false;
 
       if(SMSMap.infoDivVisible){
-        SMSMap.infoDiv.style.zIndex = -1;
+        SMSMap.infoDiv.style.pointerEvents = "none";
         SMSMap.infoDiv.style.opacity = 0;
         SMSMap.infoDivVisible = false;
+      }
+    },
+
+
+
+    doFilter: function(){
+      console.log("doing that filter!!!");
+      if(SMSMap.filterVisible){
+        SMSMap.filter.style.pointerEvents = "none";
+        SMSMap.filter.style.opacity = 0;
+        SMSMap.filterVisible = false;
+
+        SMSMap.filterDisplayButton.style.opacity = 1;
+        SMSMap.filterDisplayButton.style.pointerEvents = "auto";
+      }else{
+        SMSMap.filter.style.pointerEvents = "auto";
+        SMSMap.filter.style.opacity = 1;
+        SMSMap.filterVisible = true;
+
+        SMSMap.filterDisplayButton.style.opacity = 0;
+        SMSMap.filterDisplayButton.style.pointerEvents = "none";
       }
     },
 
@@ -130,9 +199,12 @@ var SMSMap = {
             SMSMap.pointClicked.setIcon(SMSMap.defaultIcon);
           }
 
+          if(SMSMap.filterVisible){
+            SMSMap.doFilter();
+          }
+
           SMSMap.pointClicked = this;
           this.setIcon(SMSMap.selectedIcon);
-          this.setOpacity(50);
 
           SMSMap.map.setZoom(currentZoom < 6 ? 6 : currentZoom);
           SMSMap.map.setCenter(new google.maps.LatLng(lat, long));
@@ -174,24 +246,31 @@ var SMSMap = {
      *   @param arrayLoc - The array location within coopData array that we are going to display on the screen
      **/
     drawInfoDiv: function (arrayLoc) {
-        //set reference to infoDiv as property of main object for later use
-        SMSMap.infoDiv = document.getElementById("info-div");
-
         //make local variable to make shorter
-        var infoDiv = SMSMap.infoDiv;
+        var infoDiv = document.getElementById("info-div");
+        var cityHolder = document.getElementById("city-holder");
+        var companiesHolder = document.getElementById("companies-holder");
 
-        //make sure infoDiv is clear of any previously displayed content
-        infoDiv.innerHTML = "";
+        //make sure replacable elements in infoDiv are clear of any previously
+        //displayed content (i.e. the city name and company list)
+        var replace = document.getElementsByClassName("replace")
+        for (var i = 0; i < replace.length; i++){
+          replace[i].innerHTML = "";
+        }
+
+        //set reference to infoDiv as property of main object for later use
+        SMSMap.infoDiv = infoDiv;
 
         //make infoDiv visible (default css opacity is 0)
-        infoDiv.style.zIndex = 1;
+        //infoDiv.style.zIndex = 1;
+        SMSMap.infoDiv.style.pointerEvents = "auto";
         infoDiv.style.opacity = 1;
 
         //record the fact that infoDiv is now visible in the main object property
         SMSMap.infoDivVisible = true;
 
-        infoDiv.appendChild(SMSMap.createInfoClose());
-        infoDiv.appendChild(SMSMap.createCityName(arrayLoc));
+        //infoDiv.appendChild(SMSMap.createInfoClose());
+        cityHolder.appendChild(SMSMap.createCityName(arrayLoc));
 
         if (SMSMap.filteredArray[arrayLoc].companies.length > 0) {
 
@@ -201,8 +280,8 @@ var SMSMap = {
                 companyLink.href = SMSMap.filteredArray[arrayLoc].companies[i].website;
 
                 companyLink.appendChild(document.createTextNode(SMSMap.filteredArray[arrayLoc].companies[i].name));
-                SMSMap.addTextTouchEffect(companyLink);
-                infoDiv.appendChild(companyLink);
+                //SMSMap.addTextTouchEffect(companyLink);
+                companiesHolder.appendChild(companyLink);
             }
         } else {
             var defaultPara = document.createElement("p");
@@ -223,6 +302,9 @@ var SMSMap = {
      *   @param arrayLoc - The array location within the coopData array that we are going to get the city information from
      **/
     createCityName: function (arrayLoc) {
+
+
+
         var cityName = document.createElement("h1");
         var city = SMSMap.filteredArray[arrayLoc].city;
         var state = SMSMap.filteredArray[arrayLoc].state;
@@ -234,8 +316,7 @@ var SMSMap = {
             cityString += ", " + country;
         }
         cityName.appendChild(document.createTextNode(cityString));
-        cityName.style.fontSize = "45px";
-        cityName.style.textAlign = "center";
+
         return cityName;
     },
 
@@ -246,6 +327,7 @@ var SMSMap = {
      *   Creates that button the will remove the infoDiv. This function also assigns and handles the necessary events
      *   associated with the close button.
      **/
+     /*
     createInfoClose: function () {
         var closeButton = document.createElement("div");
         closeButton.id = "info-close";
@@ -260,7 +342,7 @@ var SMSMap = {
 
         return closeButton;
     },
-
+*/
 
 
     /**
@@ -271,15 +353,15 @@ var SMSMap = {
      *
      *   @param el - the text element the touch effects should be added to
      **/
+    /*
     addTextTouchEffect: function (el) {
         el.ontouchstart = function () {
             el.style.color = SMSMap.effectColor;
-            console.log("touch!!!");
         }
         el.ontouchend = function () {
             el.style.color = SMSMap.textColor;
         }
-    },
+    },*/
 
 
 
@@ -352,27 +434,65 @@ var SMSMap = {
      *   drawControls
      *   Creates the control div and adds the necessary filters that we need
      **/
-    drawControls: function () {
-        var controlDiv = document.createElement("div");
-        controlDiv.id = "controls";
 
-        var stateFilter = document.createElement("select");
-        stateFilter.style.marginLeft = "10%";
+
+    drawControls: function () {
+        //var controlDiv = document.createElement("div");
+        //controlDiv.id = "controls";
+
+        var stateFilter = document.getElementById("filter-state-div");
+        //stateFilter.style.marginLeft = "10%";
 
         var states = SMSMap.createStateList();
-        var stateSelect;
+        var stateP;
         for (i = 0; i < states.length; i++) {
-            stateSelect = document.createElement("option");
-            stateSelect.value = states[i];
-            stateSelect.appendChild(document.createTextNode(states[i]));
-            stateFilter.appendChild(stateSelect);
+            stateP = document.createElement("p");
+            stateP.value = states[i];
+            stateP.appendChild(document.createTextNode(states[i]));
+            stateFilter.appendChild(stateP);
+
+            if(SMSMap.pastFilteredStates.indexOf(states[i]) > -1){
+              console.log(states[i]);
+              stateP.className = "past";
+            }
+
+            stateP.onclick = function(){
+              var filterNow = document.getElementById("filter-calc");
+              var filterNowReady = document.getElementById("filter-calc-ready");
+
+              console.log("on push there were: " + SMSMap.currentFilteredStates.length + " elements in the array");
+              //console.log(this.value);
+              if(!this.className){
+                //console.log(this.className);
+                this.className = "current";
+                SMSMap.currentFilteredStates.push(this.value);
+                console.log("after adding an element there are: " + SMSMap.currentFilteredStates.length + " elements in the array")
+                if(filterNow){
+                  filterNow.id = "filter-calc-ready";
+                }
+              }else{
+                var tempIndex = SMSMap.currentFilteredStates.indexOf(this.value);
+                if(tempIndex > -1){
+                  SMSMap.currentFilteredStates.splice(tempIndex, 1);
+                }
+                console.log("after subtracting an element there are: " + SMSMap.currentFilteredStates.length + " elements in the array")
+                this.className = "";
+                //console.log(this.className);
+              }
+
+              if(SMSMap.currentFilteredStates.length < 1 && filterNowReady){
+                filterNowReady.id = "filter-calc";
+              }
+            }
         }
-        stateFilter.onchange = function () {
-            SMSMap.filterStates(stateFilter.options[stateFilter.selectedIndex].value);
-            SMSMap.drawPoints();
-        }
-        controlDiv.appendChild(stateFilter);
-        document.getElementById("wrapper").appendChild(controlDiv);
+
+        //stateFilter.onchange = function () {
+        //    SMSMap.filterStates(stateFilter.options[stateFilter.selectedIndex].value);
+        //    SMSMap.drawPoints();
+        //}
+
+        //controlDiv.appendChild(stateFilter);
+        //document.getElementById("wrapper").appendChild(controlDiv);
     },
 
 
@@ -1747,7 +1867,7 @@ var SMSMap = {
                 },
                 {
 
-                    name:"Poseidon Systems (formerly Impact Sensors)",
+                    name:"Poseidon Systems",
                     website:"http://www.poseidonsys.com/"
                 },
                  {
@@ -1768,11 +1888,6 @@ var SMSMap = {
                 {
 
                     name:"RIT - College of Imaging Arts & Science",
-                    website:"http://www.res-exhibits.com/"
-                },
-                {
-
-                    name:"RES Exhibit Services",
                     website:"https://cias.rit.edu/"
                 },
                 {
@@ -1823,12 +1938,7 @@ var SMSMap = {
                 {
 
                     name:"RIT - Saunders College of Business",
-                    website:"http://www.res-exhibits.com/"
-                },
-                {
-
-                    name:"http://saunders.rit.edu/",
-                    website:"http://www.res-exhibits.com/"
+                    website:"http://saunders.rit.edu/"
                 },
                 {
 
@@ -2025,9 +2135,9 @@ var SMSMap = {
             companies:[
               {
 
-                    name:"Ryan Edwards Communications - Cunard",
+                    name:"Ryan Edwards",
                     website:"http://www.ryanedwards.ca/",
-                    industry:"Print"
+                    industry:"Agency"
                 }
             ]
         },

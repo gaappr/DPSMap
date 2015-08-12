@@ -13,12 +13,44 @@
 </head>
 <body>
     <article id="wrapper">
+
         <div id="info-div">
-          <p id="default">We're sorry, we can't find the company names, but someone did go on co-op in this city!</p>
+          <div class="close info">&#215;</div>
+          <p class="label location">Location</p>
+          <div class="replace" id="city-holder">
+
+          </div>
+          <p class="label companies">Co-op Companies <span>(click to visit website)</span>   </p>
+          <div class="replace" id="companies-holder">
+            <p id="default">We're sorry, we can't find the company names, but someone did go on co-op in this city!</p>
+          </div>
         </div>
+
+        <div id="filter">
+          <div class="close filter">&#215;</div>
+
+          <p class="label state">Filter by <span>State</span></p>
+          <div id="filter-state-div">
+
+          </div>
+
+          <p class="label industry">Filter by <span>Industry</span></p>
+          <div id="filter-industry-div">
+
+          </div>
+          <div class="filter-button" id="filter-calc">
+            <p>Filter Now</p>
+          </div>
+        </div>
+
         <div id="sms-map">
 
         </div>
+
+        <div class="filter-button" id="filter-display">
+          <p>Filter</p>
+        </div>
+
     </article>
     <script>
         SMSMap.setWrapperSize();

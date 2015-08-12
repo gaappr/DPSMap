@@ -1,58 +1,180 @@
 @import "bourbon/bourbon";
 @import "neat/neat";
+@import url(http://fonts.googleapis.com/css?family=Nunito:300,400);
 
-$background-color: rgba(0,0,0,.75);
+$background-color: rgba(0,0,0,.85);
+$font-stack: 'Nunito', sans-serif;
 $interface-color: #fff;
 
+@mixin topdiv {
+  background: $background-color;
+  left: 0;
+  opacity: 0;
+  overflow-y: auto;
+  max-height: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transition: opacity 1s;
+  width: 100%;
+  z-index: 1;
+}
+
+
 body {
-  margin:0px;
-  padding:0px;
+  margin: 0px;
+  padding: 0px;
+  font-family: $font-stack;
 }
 
 .company-link {
+  background-color: rgba(255,255,255,.1);
   color: white;
   display: block;
-  font-size: 30px;
+  font-size: 20px;
+  margin-bottom: 15px;
+  padding: 5px 0px;
   text-align: center;
   text-decoration: none;
 }
 
-#controls {
+#filter {
+  @include topdiv;
+
+  height: 70%;
+  max-height: none;
+  opacity: 0; //for testing right now, delete later
+  padding-top: 15px;
+  pointer-events: none;//for testing will have to set to 0 then change in js when filter button clicked like infodiv
+  transition: opacity .5s;
+
+  #filter-state-div {
+    height: 120px;
+    overflow: auto;
+    width: 25%;
+    text-align: center;
+    left: 37.5%;
+    position: relative;
+
+    p{
+      background-color: rgba(255,255,255,.1);
+      padding: 5px 0px;
+      margin: 3px 0px;
+    }
+
+    .current{
+      background-color: #00adee;
+    }
+
+    .past{
+      display: none;
+    }
+  }
+}
+
+.filter-button {
   background-color: rgba(5, 5, 5, .8);
   border-radius: 35px;
   bottom: 3%;
-  height: 8%;
+  height: 45px;
   left: 30%;
+  padding-top: 2px;
   position: absolute;
   width: 40%;
   z-index: 100;
+  transition: opacity .5s;
+
+  &#filter-calc{
+    background-color: rgba(255,255,255,.3);
+    left: 20%;
+    opacity: .3;
+    width: 60%;
+  }
+
+  &#filter-calc-ready {
+    background-color: #00adee;
+    left: 20%;
+    opacity: 1;
+    width: 60%;
+  }
+
+  p {
+    font-size: 200%;
+    font-weight: 300;
+    margin: 0;
+    text-align: center;
+  }
 }
 
-#info-close {
-  background: red;
-  border-radius: 30px;
-  height: 60px;
+.close {
+  color: red;
+  font-weight: 300;
+  font-size: 350%;
+  border: 2px solid red;
+  line-height: .58;
+  padding-left: 2px;
+  background: rgba(255,255,255,.85);
+  border-radius: 100%;
+  height: 45px;
+  opacity: .9;
   position: absolute;
-  right: 30px;
-  top: 30px;
-  width: 60px;
+  right: 15px;
+  top: 15px;
+  width: 45px;
+
+  //&:active {
+   // opacity: 1;
+  //}
 }
 
 #info-div {
-  background: $background-color;
-  height: 50%;
+  @include topdiv;
+
+  /*background: $background-color;
   left: 0;
   opacity: 0;
   overflow-y: auto;
-  //pointer-events: none;
+  max-height: 50%;
+  pointer-events: none;
   position: absolute;
   top: 0;
+  transition: opacity 1s;
   width: 100%;
-  z-index: -1;
+  z-index: 1;*/
+
+  h1{
+    font-size: 30px;
+    margin: 0px 15px;
+    width: 65%;
+  }
 
   #default {
     display: block;
     text-align: center;
+  }
+}
+
+.label{
+  font-style: italic;
+  font-weight: 300;
+  margin: 15px 0px 0px 15px;
+  margin-bottom: 0px;
+
+  &.companies{
+    text-align: center;
+    margin: 30px 0px 10px 0px;
+  }
+
+  &.state,
+  &.industry{
+    font-size: 200%;
+    font-style: normal;
+    margin-bottom: 10px;
+
+    span{
+      font-weight: 400;
+    }
+
   }
 }
 
