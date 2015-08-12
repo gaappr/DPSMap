@@ -69,6 +69,7 @@ var SMSMap = {
     addListeners: function(){
       var closeButton = document.getElementsByClassName("close");
       var filterDisplayButton = document.getElementById("filter-display");
+      var filterCalc = document.getElementById("filter-calc");
 
       //zoom change event listener for entire map
       google.maps.event.addListener(SMSMap.map, "zoom_changed", function(){
@@ -113,6 +114,33 @@ var SMSMap = {
       filterDisplayButton.onclick = function() {
         SMSMap.doFilter();
         SMSMap.hideInfo();
+      }
+
+      filterCalc.onclick = function(){
+        console.log(this);
+        console.log(this.id);
+        if(SMSMap.currentFilteredStates.length > 0 && this.id === "filter-calc-ready"){
+          SMSMap.doFilter();
+
+          SMSMap.filterStates(SMSMap.currentFilteredStates);
+          SMSMap.drawPoints();
+
+          for(var i = SMSMap.pastFilteredStates.length - 1; i > -1; i--){
+            console.log(i);
+            console.log(SMSMap.pastFilteredStates[i]);
+            SMSMap.pastFilteredStates[i].className = "list";
+            SMSMap.pastFilteredStates.pop();
+          }
+
+          for(var i = SMSMap.currentFilteredStates.length - 1; i > -1; i--){
+            console.log(i);
+            console.log(SMSMap.currentFilteredStates[i]);
+            SMSMap.currentFilteredStates[i].className = "past";
+            SMSMap.pastFilteredStates.push(SMSMap.currentFilteredStates[i]);
+            SMSMap.currentFilteredStates.pop();
+          }
+          this.id = "filter-calc";
+        }
       }
 
       //also save a reference to the filter display button and div for later use
@@ -184,6 +212,14 @@ var SMSMap = {
      *   @param bounds - boolean indicating whether the points should be bounded into the map display or not.
      **/
     createPoint: function (lat, long, arrayLocation, bounds) {
+        console.log("---------");
+        console.log(lat);
+        console.log(long);
+        console.log(arrayLocation);
+        console.log(bounds);
+        console.log("--------");
+
+
         var point = {
             'position': new google.maps.LatLng(lat,long),
             'bounds': bounds,
@@ -371,17 +407,24 @@ var SMSMap = {
      *
      *   @param stateString - the state abbreviation you would like to filter.
      **/
-    filterStates: function (stateString) {
+    filterStates: function (filteredArr) {
         SMSMap.clearMap();
 
         //SMSMap.mapPoints = [];
-        for (i = 0; i < SMSMap.coopData.length; i++) {
-            if (SMSMap.coopData[i].state == stateString || stateString == "All") {
-                SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
-            }
+        for(var a = 0; a < filteredArr.length; a++){
+          stateString = filteredArr[a].value;
+          for (i = 0; i < SMSMap.coopData.length; i++) {
+              //console.log(SMSMap.coopData[i].state);
+              //console.log(stateString);
+              if (SMSMap.coopData[i].state == stateString || stateString == "All") {
+                  console.log("MATCH");
+                  SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
+              }
+          }
         }
 
-        SMSMap.filterPosition(stateString);
+        console.log(SMSMap.mapPoints);
+        SMSMap.filterPosition();//stateString);
     },
 
 
@@ -407,7 +450,7 @@ var SMSMap = {
      * @param stateString - string, user filter selection (two letter state
      *                      abreviation or "All" to include all points)
      */
-    filterPosition: function (stateString){
+    filterPosition: function (){//(stateString){
       var tempLat = 0;
       var tempLng = 0;
 
@@ -419,13 +462,13 @@ var SMSMap = {
       avgLat = tempLat / SMSMap.mapPoints.length;
       avgLng = tempLng / SMSMap.mapPoints.length;
 
-      if(stateString == "All"){
-        SMSMap.map.setCenter(new google.maps.LatLng(38.611563, -98.545487));
-        SMSMap.map.setZoom(3);
-      }else{
+      //if(stateString === "All"){
+      //  SMSMap.map.setCenter(new google.maps.LatLng(38.611563, -98.545487));
+      //  SMSMap.map.setZoom(3);
+      //}else{
         SMSMap.map.setCenter(new google.maps.LatLng(avgLat, avgLng));
-        SMSMap.map.setZoom(6);
-      }
+        SMSMap.map.setZoom(3);
+      //}
     },
 
 
@@ -437,22 +480,19 @@ var SMSMap = {
 
 
     drawControls: function () {
-        //var controlDiv = document.createElement("div");
-        //controlDiv.id = "controls";
-
         var stateFilter = document.getElementById("filter-state-div");
-        //stateFilter.style.marginLeft = "10%";
 
         var states = SMSMap.createStateList();
         var stateP;
         for (i = 0; i < states.length; i++) {
             stateP = document.createElement("p");
+            stateP.className = "list";
             stateP.value = states[i];
             stateP.appendChild(document.createTextNode(states[i]));
             stateFilter.appendChild(stateP);
 
             if(SMSMap.pastFilteredStates.indexOf(states[i]) > -1){
-              console.log(states[i]);
+              SMSMap.pastFilteredStates[SMSMap.pastFilteredStates.indexOf(states[i])] = stateP;
               stateP.className = "past";
             }
 
@@ -460,29 +500,56 @@ var SMSMap = {
               var filterNow = document.getElementById("filter-calc");
               var filterNowReady = document.getElementById("filter-calc-ready");
 
-              console.log("on push there were: " + SMSMap.currentFilteredStates.length + " elements in the array");
-              //console.log(this.value);
-              if(!this.className){
-                //console.log(this.className);
+              if(this.className === "list"){
                 this.className = "current";
-                SMSMap.currentFilteredStates.push(this.value);
-                console.log("after adding an element there are: " + SMSMap.currentFilteredStates.length + " elements in the array")
+                SMSMap.currentFilteredStates.push(this);
+
                 if(filterNow){
                   filterNow.id = "filter-calc-ready";
+                  filterNowReady = filterNow;
+                  filterNow = null;
                 }
               }else{
-                var tempIndex = SMSMap.currentFilteredStates.indexOf(this.value);
+                var tempIndex = SMSMap.currentFilteredStates.indexOf(this);
+
                 if(tempIndex > -1){
                   SMSMap.currentFilteredStates.splice(tempIndex, 1);
                 }
-                console.log("after subtracting an element there are: " + SMSMap.currentFilteredStates.length + " elements in the array")
-                this.className = "";
-                //console.log(this.className);
+
+                this.className = "list";
               }
 
               if(SMSMap.currentFilteredStates.length < 1 && filterNowReady){
                 filterNowReady.id = "filter-calc";
+                filterNow = filterNowReady;
+                filterNowReady = null;
               }
+
+              /*if(SMSMap.currentFilteredStates.length > 0 && filterNowReady){
+                filterNowReady.onclick = function(){
+                  SMSMap.doFilter();
+
+                  SMSMap.filterStates(SMSMap.currentFilteredStates[0].value);
+                  SMSMap.drawPoints();
+
+                  for(var i = SMSMap.pastFilteredStates.length - 1; i > -1; i--){
+                    console.log(i);
+                    console.log(SMSMap.pastFilteredStates[i]);
+                    SMSMap.pastFilteredStates[i].className = "list";
+                    SMSMap.pastFilteredStates.pop();
+                  }
+
+                  for(var i = SMSMap.currentFilteredStates.length - 1; i > -1; i--){
+                    console.log(i);
+                    console.log(SMSMap.currentFilteredStates[i]);
+                    SMSMap.currentFilteredStates[i].className = "past";
+                    SMSMap.pastFilteredStates.push(SMSMap.currentFilteredStates[i]);
+                    SMSMap.currentFilteredStates.pop();
+                  }
+                  filterNowReady.id = "filter-calc";
+
+                }
+              }*/
             }
         }
 
