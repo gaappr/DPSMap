@@ -47,30 +47,6 @@ body {
   padding-top: 15px;
   pointer-events: none;//for testing will have to set to 0 then change in js when filter button clicked like infodiv
   transition: opacity .5s;
-
-  #filter-state-div {
-    height: 120px;
-    overflow: auto;
-    width: 25%;
-    text-align: center;
-    left: 37.5%;
-    position: relative;
-
-    p,
-    .list {
-      background-color: rgba(255,255,255,.1);
-      padding: 5px 0px;
-      margin: 3px 0px;
-    }
-
-    .current{
-      background-color: #00adee;
-    }
-
-    .past{
-      display: none;
-    }
-  }
 }
 
 .filter-button {
@@ -107,6 +83,76 @@ body {
   }
 }
 
+
+.filter-position {
+  height: 100%;
+  margin-left: 3%;
+  width: 30%;
+  float: left;
+
+  &.state {
+
+  }
+}
+
+
+
+
+
+.filter-selection {
+  height: 275px;//CHANGE make dynamic later and a bunch more lldsofaosjfklsad
+  overflow: auto;
+  //width: 25%;
+  text-align: center;
+  //left:20px;
+  position: relative;
+  float: left;
+  width: 100%;
+  //clear: both;
+  //top: 20px;
+
+  p,
+  .list {
+    background-color: rgba(255,255,255,.1);
+    padding: 9px 0px;
+    margin: 0px 0px 3px 0px;
+  }
+
+  .current{
+    background-color: #00adee;
+  }
+
+  .current-bad{
+    background-color: red;
+  }
+}
+
+.filter-warning{
+  background-color: red;
+  bottom: 0px;
+  position: absolute;
+  margin: 0px;
+  text-align: center;
+  width: 100%;
+  opacity: 0;
+  transition: opacity .5s;
+
+  //font-size: 150%;
+  p{
+    margin: 2px;
+  }
+  .bottom{
+    //bottom: 12px;
+    font-size: 125%;
+  }
+
+  .top{
+    //bottom: 37px;
+    font-weight: 300;
+  }
+
+}
+
 .close {
   color: red;
   font-weight: 300;
@@ -122,26 +168,10 @@ body {
   right: 15px;
   top: 15px;
   width: 45px;
-
-  //&:active {
-   // opacity: 1;
-  //}
 }
 
 #info-div {
   @include topdiv;
-
-  /*background: $background-color;
-  left: 0;
-  opacity: 0;
-  overflow-y: auto;
-  max-height: 50%;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  transition: opacity 1s;
-  width: 100%;
-  z-index: 1;*/
 
   h1{
     font-size: 30px;
@@ -168,14 +198,37 @@ body {
 
   &.state,
   &.industry{
-    font-size: 200%;
     font-style: normal;
-    margin-bottom: 10px;
+    margin: 10px 0px;
+    width: 100%;
+    float: left;
+    text-align: center;
 
     span{
       font-weight: 400;
+      font-size: 140%;
     }
+  }
+}
 
+#state-div-past{
+  position: relative;
+  float: right;
+  ywidth: 30%;
+  top: 15%;
+
+  .label{
+    font-style: normal;
+        font-weight: 400;
+        margin: 0px;
+
+  }
+
+  p{
+    background-color: initial;
+    text-align: left;
+    border-left: 2px solid white;
+    padding: 0px 0px 0px 5px;
   }
 }
 

@@ -7,8 +7,15 @@ var SMSMap = {
     infoDivVisible: false,
     pointClicked: false,
 
-    pastFilteredStates: ["All"],
-    currentFilteredStates: [],
+    pastFiltered: {
+      "industry": [],
+      "states": []
+    },
+
+    currentFiltered: {
+      "industry": [],
+      "states": []
+    },
 
     //Change the following two objects when a new image is added
     defaultIcon: {
@@ -42,9 +49,11 @@ var SMSMap = {
      *   Called initially to setup the map - there will be no points on the map initially
      **/
     initiateMap: function () {
+      console.log(SMSMap.pastFiltered);
       SMSMap.filteredArray = SMSMap.coopData;
 
-      SMSMap.drawControls();
+      SMSMap.drawStateFilters();
+      SMSMap.drawIndustryFilters();
 
       var mapOptions = {
         'zoom': 3,
@@ -95,16 +104,12 @@ var SMSMap = {
         }
       });
 
-      //SMSMap.addTextTouchEffect(closeButton);
-
       for( var i = 0; i < closeButton.length; i++){
         if(closeButton[i].className === "close info"){
-          console.log("brap");
           closeButton[i].onclick = function () {
             SMSMap.hideInfo();
           };
         }else{
-          console.log("bananas");
           closeButton[i].onclick = function () {
             SMSMap.doFilter();
           };
@@ -117,35 +122,141 @@ var SMSMap = {
       }
 
       filterCalc.onclick = function(){
-        console.log(this);
-        console.log(this.id);
-        if(SMSMap.currentFilteredStates.length > 0 && this.id === "filter-calc-ready"){
+        if((SMSMap.currentFiltered.states.length > 0 || SMSMap.currentFiltered.industry.length > 0) && this.id === "filter-calc-ready"){
           SMSMap.doFilter();
 
-          SMSMap.filterStates(SMSMap.currentFilteredStates);
+          SMSMap.filter(SMSMap.currentFiltered);
           SMSMap.drawPoints();
 
-          for(var i = SMSMap.pastFilteredStates.length - 1; i > -1; i--){
-            console.log(i);
-            console.log(SMSMap.pastFilteredStates[i]);
-            SMSMap.pastFilteredStates[i].className = "list";
-            SMSMap.pastFilteredStates.pop();
-          }
+          SMSMap.clearPastFiltered("industry");
+          SMSMap.clearPastFiltered("states");
+          //for(var i = SMSMap.pastFiltered.states.length - 1; i > -1; i--){
+           // SMSMap.pastFiltered.states[i].className = "list";
+           // SMSMap.pastFiltered.states.pop();
+          //}
 
-          for(var i = SMSMap.currentFilteredStates.length - 1; i > -1; i--){
-            console.log(i);
-            console.log(SMSMap.currentFilteredStates[i]);
-            SMSMap.currentFilteredStates[i].className = "past";
-            SMSMap.pastFilteredStates.push(SMSMap.currentFilteredStates[i]);
-            SMSMap.currentFilteredStates.pop();
-          }
+          SMSMap.clearCurrentFilteredPushToPast("industry");
+          SMSMap.clearCurrentFilteredPushToPast("states");
+          //for(var i = SMSMap.currentFiltered.states.length - 1; i > -1; i--){
+          //  SMSMap.currentFiltered.states[i].className = "list";
+          //  SMSMap.pastFiltered.states.push(SMSMap.currentFiltered.states[i]);
+
+          //  SMSMap.currentFiltered.states.pop();
+          //}
           this.id = "filter-calc";
         }
       }
 
       //also save a reference to the filter display button and div for later use
-      SMSMap.filter = document.getElementById("filter");
+      SMSMap.filterElement = document.getElementById("filter");
       SMSMap.filterDisplayButton = filterDisplayButton;
+    },
+
+
+    //arr as string
+    clearPastFiltered: function(arr){
+      for(var i = SMSMap.pastFiltered[arr].length - 1; i > -1; i--){
+        SMSMap.pastFiltered[arr][i].className = "list";
+        SMSMap.pastFiltered[arr].pop();
+      }
+    },
+
+
+    clearCurrentFilteredPushToPast: function(arr){
+      for(var i = SMSMap.currentFiltered[arr].length - 1; i > -1; i--){
+        SMSMap.currentFiltered[arr][i].className = "list";
+        SMSMap.pastFiltered[arr].push(SMSMap.currentFiltered[arr][i]);
+
+        SMSMap.currentFiltered[arr].pop();
+      }
+    },
+
+
+
+    /**
+     * compareArray
+     *   Compares two objects that both have two arrays. Checks for equal length
+     *   and then checks to see if the elements that are passed to it have a
+     *   compareVal and if they are equal. Used to see if user is choosing a new filter or not.
+     *
+     * @param {object} objA - first object to compare
+     * @param {object} objB - second object to compare
+     * @param {object} arrA - first array to compare
+     * @param {object} arrB - second array to compare
+     * @param {string} compareProp - property to compare for each elements in arrays
+     *
+     * @return {boolean} - if arrays ar equal or not
+     */
+    compareFilterSelections: function(objA, objB, arrA, arrB, compareProp){
+
+      //if an object doesn't have an array as a properties return false
+      if(!objA[arrA] || !objA[arrB] || !objB[arrA] || !objA[arrB]){
+        console.log("here Jack");
+        return false;
+      }
+      //check if array lengths are different and return false if so
+      if(objA[arrA].length !== objB[arrA].length || objA[arrB].length !== objB[arrB].length){
+        console.log("here Jack");
+        return false;
+      }
+
+      //check that array length is greater than one (all arrays are same length )
+      //console.log(objA[0].value);
+      //console.log(objB[0]);
+      //if(objA[arrA].length > 0)
+      //  if(!objA[arrA][0][compareProp] || !objB[arrA][0][compareProp]) return false;
+      //  if(!objA[arrB][0][compareProp] || !objB[arrB][0][compareProp]) return false;
+      //else{
+      ///  return false;
+      //}
+      //
+      //console.log(objA);
+      //console.log(arrA);
+      //console.log(objA[arrA]);
+      //console.log(objB[arrB][0][compareProp]);
+
+      if(objA[arrA][0]){
+        if(objA[arrA][0][compareProp] && !objB[arrA][0][compareProp]){
+          console.log("here Jack");
+          return false;
+        }
+      }
+      if(objA[arrB][0]){
+        if(objA[arrB][0][compareProp] && !objB[arrB][0][compareProp]){
+          console.log("here Jack");
+          return false;
+        }
+      }
+
+      var tempObjAA = [];
+      var tempObjBA = [];
+
+      var tempObjAB = [];
+      var tempObjBB = [];
+
+      for(var i = 0; i < objA[arrA].length; i++){
+        tempObjAA.push(objA[arrA][i][compareProp]);
+        tempObjBA.push(objB[arrA][i][compareProp]);
+      }
+
+      for(var a = 0; a < objA[arrB].length; a++){
+        tempObjAB.push(objA[arrB][a][compareProp]);
+        tempObjBB.push(objB[arrB][a][compareProp]);
+      }
+
+      //slice so we do not effect the original
+      //sort makes sure they are in order
+      //join makes it a string so we can do a string compare
+      var cAA = tempObjAA.slice().sort().join(",");
+      var cBA = tempObjBA.slice().sort().join(",");
+
+      var cAB = tempObjAB.slice().sort().join(",");
+      var cBB = tempObjBB.slice().sort().join(",");
+
+
+      console.log(cAA + " = " + cBA);
+      console.log(cAB + " = " + cBB);
+      return cAA === cBA && cAB === cBB;
     },
 
 
@@ -167,17 +278,16 @@ var SMSMap = {
 
 
     doFilter: function(){
-      console.log("doing that filter!!!");
       if(SMSMap.filterVisible){
-        SMSMap.filter.style.pointerEvents = "none";
-        SMSMap.filter.style.opacity = 0;
+        SMSMap.filterElement.style.pointerEvents = "none";
+        SMSMap.filterElement.style.opacity = 0;
         SMSMap.filterVisible = false;
 
         SMSMap.filterDisplayButton.style.opacity = 1;
         SMSMap.filterDisplayButton.style.pointerEvents = "auto";
       }else{
-        SMSMap.filter.style.pointerEvents = "auto";
-        SMSMap.filter.style.opacity = 1;
+        SMSMap.filterElement.style.pointerEvents = "auto";
+        SMSMap.filterElement.style.opacity = 1;
         SMSMap.filterVisible = true;
 
         SMSMap.filterDisplayButton.style.opacity = 0;
@@ -192,11 +302,11 @@ var SMSMap = {
      *   parses through the coopData array and adds points to the map with the help of the drawPoint function.
      **/
     drawMap: function () {
-        for (var i = 0; i < SMSMap.filteredArray.length; i++) {
-            //Retrieve marker info due to the deferred callback below
-            SMSMap.createPoint(SMSMap.filteredArray[i].lat, SMSMap.filteredArray[i].long, i, false);
-        }
-        SMSMap.drawPoints();
+      for (var i = 0; i < SMSMap.filteredArray.length; i++) {
+        //Retrieve marker info due to the deferred callback below
+        SMSMap.createPoint(SMSMap.filteredArray[i].lat, SMSMap.filteredArray[i].long, i, false);
+      }
+      SMSMap.drawPoints();
     },
 
 
@@ -212,44 +322,36 @@ var SMSMap = {
      *   @param bounds - boolean indicating whether the points should be bounded into the map display or not.
      **/
     createPoint: function (lat, long, arrayLocation, bounds) {
-        console.log("---------");
-        console.log(lat);
-        console.log(long);
-        console.log(arrayLocation);
-        console.log(bounds);
-        console.log("--------");
+      var point = {
+        'position': new google.maps.LatLng(lat,long),
+        'bounds': bounds,
+        'animation': google.maps.Animation.DROP,
+        'icon': SMSMap.defaultIcon,
+      };
+      var googlePoint = new google.maps.Marker( point );
 
+      google.maps.event.addListener(googlePoint,'click',function(){
+        var currentZoom = SMSMap.map.getZoom();
 
-        var point = {
-            'position': new google.maps.LatLng(lat,long),
-            'bounds': bounds,
-            'animation': google.maps.Animation.DROP,
-            'icon': SMSMap.defaultIcon,
-        };
-        var googlePoint = new google.maps.Marker( point );
+        if(SMSMap.pointClicked){
+          SMSMap.pointClicked.setIcon(SMSMap.defaultIcon);
+        }
 
-        google.maps.event.addListener(googlePoint,'click',function(){
-          var currentZoom = SMSMap.map.getZoom();
+        if(SMSMap.filterVisible){
+          SMSMap.doFilter();
+        }
 
-          if(SMSMap.pointClicked){
-            SMSMap.pointClicked.setIcon(SMSMap.defaultIcon);
-          }
+        SMSMap.pointClicked = this;
+        this.setIcon(SMSMap.selectedIcon);
 
-          if(SMSMap.filterVisible){
-            SMSMap.doFilter();
-          }
+        SMSMap.map.setZoom(currentZoom < 6 ? 6 : currentZoom);
+        SMSMap.map.setCenter(new google.maps.LatLng(lat, long));
+        SMSMap.map.panBy(0, -120);
 
-          SMSMap.pointClicked = this;
-          this.setIcon(SMSMap.selectedIcon);
+        SMSMap.drawInfoDiv(arrayLocation);
+      });
 
-          SMSMap.map.setZoom(currentZoom < 6 ? 6 : currentZoom);
-          SMSMap.map.setCenter(new google.maps.LatLng(lat, long));
-          SMSMap.map.panBy(0, -120);
-
-          SMSMap.drawInfoDiv(arrayLocation);
-        });
-
-        SMSMap.mapPoints.push(googlePoint);
+      SMSMap.mapPoints.push(googlePoint);
     },
 
 
@@ -359,29 +461,6 @@ var SMSMap = {
 
 
     /**
-     *   createInfoClose
-     *   Creates that button the will remove the infoDiv. This function also assigns and handles the necessary events
-     *   associated with the close button.
-     **/
-     /*
-    createInfoClose: function () {
-        var closeButton = document.createElement("div");
-        closeButton.id = "info-close";
-
-        SMSMap.addTextTouchEffect(closeButton);
-
-        closeButton.onclick = function () {
-            SMSMap.hideInfo();
-        };
-
-        SMSMap.infoDiv.appendChild(closeButton);
-
-        return closeButton;
-    },
-*/
-
-
-    /**
      *   addTextTouchEffect
      *   Adds an effect to the text that is called when a button is touched on a phone. Any text-based element can
      *   be passed into the function and the effect will be added. This is a utility function to ensure all elements have
@@ -402,29 +481,78 @@ var SMSMap = {
 
 
     /**
-     *   filterStates
+     *   filter
      *   filters the coopData based on an input string
      *
-     *   @param stateString - the state abbreviation you would like to filter.
+     *   @param filteredObj - the entire current filtered object that holds the current
+     *                        filtered industry array as well as the current filtered
+     *                        states array.
      **/
-    filterStates: function (filteredArr) {
+    filter: function (filteredObj) {         //MONDAY...make filter work for industry as well
         SMSMap.clearMap();
 
         //SMSMap.mapPoints = [];
-        for(var a = 0; a < filteredArr.length; a++){
-          stateString = filteredArr[a].value;
+      if(filteredObj.states.length > 0 && filteredObj.industry.length < 1){
+        for(var a = 0; a < filteredObj.states.length; a++){
+          stateString = filteredObj.states[a].value;
+
           for (i = 0; i < SMSMap.coopData.length; i++) {
-              //console.log(SMSMap.coopData[i].state);
-              //console.log(stateString);
-              if (SMSMap.coopData[i].state == stateString || stateString == "All") {
-                  console.log("MATCH");
-                  SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
+            if (SMSMap.coopData[i].state == stateString || stateString == "All") {
+              SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
+            }
+          }
+        }
+      }
+
+      else if(filteredObj.states.length < 1 && filteredObj.industry.length > 0){
+        for(var b = 0; b < filteredObj.industry.length; b++){
+          industryString = filteredObj.industry[b].value;
+
+          for (c = 0; c < SMSMap.coopData.length; c++) {
+            for(d = 0; d < SMSMap.coopData[c].companies.length; d++){
+              if(SMSMap.coopData[c].companies[d].industry == industryString || industryString == "All"){
+                SMSMap.createPoint(SMSMap.coopData[c].lat, SMSMap.coopData[c].long, c, true);
               }
+            }
+          }
+        }
+      }
+
+      else{
+        tempStateArr = [];
+        tempStatePos = []
+
+        for(var a = 0; a < filteredObj.states.length; a++){
+          stateString = filteredObj.states[a].value;
+
+          for (i = 0; i < SMSMap.coopData.length; i++) {
+            if (SMSMap.coopData[i].state == stateString || stateString == "All") {
+              //SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
+              tempStateArr.push(SMSMap.coopData[i]);
+              tempStatePos.push(i);
+            }
           }
         }
 
+        console.log(tempStateArr);
+        console.log(tempStatePos);
+
+        if(tempStateArr.length > 0){
+          for(var b = 0; b < filteredObj.industry.length; b++){
+            industryString = filteredObj.industry[b].value;
+
+            for (c = 0; c < tempStateArr.length; c++) {
+              for(d = 0; d < tempStateArr[c].companies.length; d++){
+                if(tempStateArr[c].companies[d].industry == industryString || industryString == "All"){
+                  SMSMap.createPoint(tempStateArr[c].lat, tempStateArr[c].long, tempStatePos[c], true);
+                }
+              }
+            }
+          }
+        }
+      }
         console.log(SMSMap.mapPoints);
-        SMSMap.filterPosition();//stateString);
+        SMSMap.filterPosition();//MONDAY...change this to bounds [http://stackoverflow.com/questions/19304574/center-set-zoom-of-map-to-cover-all-markers-visible-markers]
     },
 
 
@@ -474,92 +602,182 @@ var SMSMap = {
 
 
     /**
-     *   drawControls
+     *   drawStateFilters
      *   Creates the control div and adds the necessary filters that we need
      **/
 
 
-    drawControls: function () {
-        var stateFilter = document.getElementById("filter-state-div");
+    drawStateFilters: function () {
+        var stateFilter = document.getElementById("state-div");
 
         var states = SMSMap.createStateList();
         var stateP;
         for (i = 0; i < states.length; i++) {
-            stateP = document.createElement("p");
-            stateP.className = "list";
-            stateP.value = states[i];
-            stateP.appendChild(document.createTextNode(states[i]));
-            stateFilter.appendChild(stateP);
+          stateP = document.createElement("p");
+          stateP.className = "list";
+          stateP.value = states[i];
+          stateP.appendChild(document.createTextNode(states[i]));
+          stateFilter.appendChild(stateP);
 
-            if(SMSMap.pastFilteredStates.indexOf(states[i]) > -1){
-              SMSMap.pastFilteredStates[SMSMap.pastFilteredStates.indexOf(states[i])] = stateP;
-              stateP.className = "past";
+          //puts "All" as the past selected filter on creation of map
+          if(stateP.value === "All"){
+            SMSMap.pastFiltered.states[0] = stateP;
+            var tempState = document.createElement("p");
+            tempState.value = states[i];
+            tempState.appendChild(document.createTextNode(states[i]));
+            document.getElementById("state-div-past").appendChild(tempState);
+          }
+
+          stateP.onclick = function(){
+            SMSMap.addFilterListeners(this, "states");
+          } //function(){}
+/*          var filterNow = document.getElementById("filter-calc");
+            var filterNowReady = document.getElementById("filter-calc-ready");
+            var current = SMSMap.currentFiltered.states;
+
+            if(this.className === "list"){
+              this.className = "current";
+              current.push(this);
+
+              if(filterNow && !SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value")){
+                filterNow.id = "filter-calc-ready";
+                filterNowReady = filterNow;
+                filterNow = null;
+              }
+            }else{
+              var tempIndex = current.indexOf(this);
+
+              if(tempIndex > -1){
+                current.splice(tempIndex, 1);
+              }
+              this.className = "list";
             }
 
-            stateP.onclick = function(){
-              var filterNow = document.getElementById("filter-calc");
-              var filterNowReady = document.getElementById("filter-calc-ready");
-
-              if(this.className === "list"){
-                this.className = "current";
-                SMSMap.currentFilteredStates.push(this);
-
-                if(filterNow){
-                  filterNow.id = "filter-calc-ready";
-                  filterNowReady = filterNow;
-                  filterNow = null;
-                }
-              }else{
-                var tempIndex = SMSMap.currentFilteredStates.indexOf(this);
-
-                if(tempIndex > -1){
-                  SMSMap.currentFilteredStates.splice(tempIndex, 1);
-                }
-
-                this.className = "list";
-              }
-
-              if(SMSMap.currentFilteredStates.length < 1 && filterNowReady){
-                filterNowReady.id = "filter-calc";
-                filterNow = filterNowReady;
-                filterNowReady = null;
-              }
-
-              /*if(SMSMap.currentFilteredStates.length > 0 && filterNowReady){
-                filterNowReady.onclick = function(){
-                  SMSMap.doFilter();
-
-                  SMSMap.filterStates(SMSMap.currentFilteredStates[0].value);
-                  SMSMap.drawPoints();
-
-                  for(var i = SMSMap.pastFilteredStates.length - 1; i > -1; i--){
-                    console.log(i);
-                    console.log(SMSMap.pastFilteredStates[i]);
-                    SMSMap.pastFilteredStates[i].className = "list";
-                    SMSMap.pastFilteredStates.pop();
-                  }
-
-                  for(var i = SMSMap.currentFilteredStates.length - 1; i > -1; i--){
-                    console.log(i);
-                    console.log(SMSMap.currentFilteredStates[i]);
-                    SMSMap.currentFilteredStates[i].className = "past";
-                    SMSMap.pastFilteredStates.push(SMSMap.currentFilteredStates[i]);
-                    SMSMap.currentFilteredStates.pop();
-                  }
-                  filterNowReady.id = "filter-calc";
-
-                }
-              }*/
+            if((current.length < 1 && filterNowReady) || filterNowReady && SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value")){
+              filterNowReady.id = "filter-calc";
+              filterNow = filterNowReady;
+              filterNowReady = null;
             }
+
+            //if current and past selections are equal
+            if(SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value")){
+
+              //show class that warns user that they have same past and current selections
+              document.getElementsByClassName("filter-warning")[0].style.opacity = 1;
+
+              //changes class of redundant filter selections...need tempLength
+              //because tempCurrent.length changes on every for loop iteration
+              //(new class includes color change to show error)
+              var tempCurrent =  document.getElementsByClassName("current");
+              var tempLength = tempCurrent.length;
+              for(i = 0; i < tempLength; i++) {
+                tempCurrent[0].className = "current-bad";
+              }
+
+            //else if current and past selections are not equal OR there are no current selections
+            }else if(!SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value") || current.length < 1){
+
+              //hide class that warns user that they have same past and current selections
+              document.getElementsByClassName("filter-warning")[0].style.opacity = 0;
+
+              //changes class of previously redundant filter selections (if present)
+              //...need tempLength because tempCurrent.length changes on every
+              //for-loop iteration (changes back to default selected class)
+              var tempCurrent = document.getElementsByClassName("current-bad");
+              var tempLength = tempCurrent.length;
+              for(i = 0; i < tempLength; i++) {
+                tempCurrent[0].className = "current";
+              }
+            }                                                           */
+        }
+    },
+
+
+    drawIndustryFilters: function(){
+      var industryFilter = document.getElementById("industry-div");
+
+      var industries = SMSMap.createIndustryList();
+      var industryP;
+      for (i = 0; i < industries.length; i++) {
+        industryP = document.createElement("p");
+        industryP.className = "list";
+        industryP.value = industries[i];
+        industryP.appendChild(document.createTextNode(industries[i]));
+        industryFilter.appendChild(industryP);
+
+        if(industryP.value === "All"){
+          SMSMap.pastFiltered.industry[0] = industryP;
+          var tempIndustry = document.createElement("p");
+          tempIndustry.value = industries[i];
+          tempIndustry.appendChild(document.createTextNode(industries[i]));
+          document.getElementById("state-div-past").appendChild(tempIndustry);
         }
 
-        //stateFilter.onchange = function () {
-        //    SMSMap.filterStates(stateFilter.options[stateFilter.selectedIndex].value);
-        //    SMSMap.drawPoints();
-        //}
+        industryP.onclick = function(){
+          SMSMap.addFilterListeners(this, "industry");
+        }
+      }
+    },
 
-        //controlDiv.appendChild(stateFilter);
-        //document.getElementById("wrapper").appendChild(controlDiv);
+
+//pass 'this' (stateP..dom element) ..type = industry or state
+    addFilterListeners: function(listItem, type){
+      var filterNow = document.getElementById("filter-calc");
+      var filterNowReady = document.getElementById("filter-calc-ready");
+      var current = SMSMap.currentFiltered[type];
+
+      if(listItem.className === "list"){
+        listItem.className = "current";
+        current.push(listItem);
+      }else{
+        var tempIndex = current.indexOf(listItem);
+
+        if(tempIndex > -1){
+          current.splice(tempIndex, 1);
+        }
+        listItem.className = "list";
+      }
+
+      if(filterNow && !SMSMap.compareFilterSelections(SMSMap.currentFiltered, SMSMap.pastFiltered, "industry", "states", "value")){
+        filterNow.id = "filter-calc-ready";
+        filterNowReady = filterNow;
+        filterNow = null;
+      }
+
+      if((current.length < 1 && filterNowReady) || filterNowReady && SMSMap.compareFilterSelections(SMSMap.currentFiltered, SMSMap.pastFiltered, "industry", "states", "value")){
+        filterNowReady.id = "filter-calc";
+        filterNow = filterNowReady;
+        filterNowReady = null;
+      }
+
+      //if current and past selections are equal
+      if(SMSMap.compareFilterSelections(SMSMap.currentFiltered, SMSMap.pastFiltered, "industry", "states", "value")){
+        //show class that warns user that they have same past and current selections
+        document.getElementsByClassName("filter-warning")[0].style.opacity = 1;
+
+        //changes class of redundant filter selections...need tempLength
+        //because tempCurrent.length changes on every for loop iteration
+        //(new class includes color change to show error)
+        var tempCurrent =  document.getElementsByClassName("current");
+        var tempLength = tempCurrent.length;
+        for(i = 0; i < tempLength; i++) {
+          tempCurrent[0].className = "current-bad";
+        }
+
+      //else if current and past selections are not equal OR there are no current selections
+      }else if(!SMSMap.compareFilterSelections(SMSMap.currentFiltered, SMSMap.pastFiltered, "industry", "states", "value") || current.length < 1){
+        //hide class that warns user that they have same past and current selections
+        document.getElementsByClassName("filter-warning")[0].style.opacity = 0;
+
+        //changes class of previously redundant filter selections (if present)
+        //...need tempLength because tempCurrent.length changes on every
+        //for-loop iteration (changes back to default selected class)
+        var tempCurrent = document.getElementsByClassName("current-bad");
+        var tempLength = tempCurrent.length;
+        for(i = 0; i < tempLength; i++) {
+          tempCurrent[0].className = "current";
+        }
+      }
     },
 
 
@@ -569,15 +787,54 @@ var SMSMap = {
      *   Creates the dropdown list of states based on which states are in the data.
      **/
     createStateList: function () {
-        var stateArray = [];
-        stateArray.push("All");
-        for (i = 0; i < SMSMap.coopData.length; i++) {
-            if (stateArray.indexOf(SMSMap.coopData[i].state) === -1 && SMSMap.coopData[i].state != undefined) {
-                stateArray.push(SMSMap.coopData[i].state);
-            }
+      var stateArray = [];
+      stateArray.push("All");
+      for (i = 0; i < SMSMap.coopData.length; i++) {
+        if (stateArray.indexOf(SMSMap.coopData[i].state) === -1 && SMSMap.coopData[i].state != undefined) {
+          stateArray.push(SMSMap.coopData[i].state);
         }
-        stateArray.sort();
-        return stateArray;
+      }
+      stateArray.sort();
+
+      if(stateArray.indexOf("All") != 0){
+        var allPos = stateArray.indexOf("All");
+        var temp = stateArray[0];
+
+        stateArray[0] = "All";
+        stateArray[allPos] = temp;
+      }
+
+      return stateArray;
+    },
+
+
+
+    /**
+     *   createIndustryList
+     *   Creates the dropdown list of states based on which states are in the data.
+     **/
+    createIndustryList: function () {
+      var industryArray = [];
+      industryArray.push("All");
+      for (a = 0; a < SMSMap.coopData.length; a++) {
+        for (i = 0; i < SMSMap.coopData[a].companies.length; i++)
+          if (industryArray.indexOf(SMSMap.coopData[a].companies[i].industry) === -1 && SMSMap.coopData[a].companies[i].industry != undefined) {
+            industryArray.push(SMSMap.coopData[a].companies[i].industry);
+          }
+      }
+
+      industryArray.sort();
+
+      if(industryArray.indexOf("All") != 0){
+        var allPos = industryArray.indexOf("All");
+        var temp = industryArray[0];
+
+        industryArray[0] = "All";
+        industryArray[allPos] = temp;
+      }
+
+      console.log(industryArray);
+      return industryArray;
     },
 
 
@@ -643,7 +900,9 @@ var SMSMap = {
             country:"IT",
             companies:[
               {
-                    name:"De Ferrari"
+                    name:"De Ferrari",
+                    website: "http://www.ferrari.com/en_us/",
+                    industry: "Advertising"
                 }
             ]
         },
@@ -655,7 +914,8 @@ var SMSMap = {
             country:"IN",
             companies:[
               {
-                    name:"Carton Manufacturing"
+                    name:"Carton Manufacturing",
+                    industry:"Consumer Products"
                 }
             ]
         },
@@ -704,12 +964,12 @@ var SMSMap = {
                 {
                     name:"Mullen",
                     website:"http://www.mullenloweus.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
                     name:"SapientNitro",
                     website:"http://www.sapientnitro.com/en-us.html#home",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
                     name:"Sullivan & McLaughlin Companies, Inc",
@@ -772,7 +1032,7 @@ var SMSMap = {
                 {
                     name:"LocalEdge Media",
                     website:"https://www.hearst.com/newspapers/localedge",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -786,7 +1046,7 @@ var SMSMap = {
               {
                     name:"Aerva",
                     website:"http://www.aerva.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 }
             ]
         },
@@ -800,7 +1060,7 @@ var SMSMap = {
               {
                     name:"Messenger Post Media",
                     website:"http://www.mpnnow.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -828,7 +1088,7 @@ var SMSMap = {
               {
                     name:"The Around Campus Group",
                     website:"http://www.aroundcampusgroup.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -842,7 +1102,7 @@ var SMSMap = {
               {
                     name:"Practis Inc",
                     website:"https://practisinc.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -925,7 +1185,7 @@ var SMSMap = {
               {
                     name:"Sun-Sentinel",
                     website:"http://www.sun-sentinel.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -939,7 +1199,7 @@ var SMSMap = {
               {
                     name:"Mobile Pulse",
                     website:"http://mobilepulse.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 }
             ]
         },
@@ -953,7 +1213,7 @@ var SMSMap = {
               {
                     name:"Jack Morton Worldwide",
                     website:"http://www.jackmorton.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -967,7 +1227,7 @@ var SMSMap = {
               {
                     name:"Univision Interactive Media Inc",
                     website:"http://www.univision.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -1008,7 +1268,7 @@ var SMSMap = {
               {
                     name:"Rodale Publishing",
                     website:"http://www.rodaleinc.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -1022,7 +1282,7 @@ var SMSMap = {
               {
                     name:"AdAsia Communications",
                     website:"http://www.adasia-us.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
                     name:"Menasha Packaging Company",
@@ -1041,7 +1301,7 @@ var SMSMap = {
               {
                     name:"Oberthur Technologies of America Corp",
                     website:"http://www.oberthur.com/?lang=en",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 }
             ]
         },
@@ -1063,7 +1323,7 @@ var SMSMap = {
                 {
                     name:"Soleo Communications Inc",
                     website:"http://www.soleo.com/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -1171,7 +1431,7 @@ var SMSMap = {
               {
                     name:"Heidelberger Druckmaschinen AG",
                     website:"https://www.heidelberg.com/us/en/index.jsp",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -1281,7 +1541,7 @@ var SMSMap = {
               {
                     name:"Canon USA Inc",
                     website:"https://www.usa.canon.com/cusa/home",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -1326,7 +1586,7 @@ var SMSMap = {
               {
                     name:"Phoenix International Publications Inc",
                     website:"http://www.phoenixip.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -1354,7 +1614,7 @@ var SMSMap = {
               {
                     name:"Schon! Magazine",
                     website:"http://www.schonmagazine.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -1415,7 +1675,7 @@ var SMSMap = {
               {
                     name:"RevHealth",
                     website:"http://www.revhealth.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -1429,7 +1689,7 @@ var SMSMap = {
               {
                     name:"Fogra Forschungsgesellschaft Druck e. V.",
                     website:"http://www.fogra.org/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -1443,7 +1703,7 @@ var SMSMap = {
               {
                     name:"Trainor Associates",
                     website:"http://www.trainor.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -1462,7 +1722,7 @@ var SMSMap = {
                 {
                     name:"AGENCYSACKS",
                     website:"http://www.agencysacks.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
                     name:"BBDO",
@@ -1482,25 +1742,25 @@ var SMSMap = {
 
                     name:"Centron",
                     website:"http://centronpublicrelations.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
                     name:"ChinaSprout",
                     website:"http://www.chinasprout.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 },
                 {
 
                     name:"Conde Nast Publications",
                     website:"http://www.condenast.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 },
                 {
 
                     name:"DPCI (Database Publishing Consultants)",
                     website:"http://www.dpci.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 },
                  {
 
@@ -1512,7 +1772,7 @@ var SMSMap = {
 
                     name:"Ensemble",
                     website:"http://letsensemble.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
 
@@ -1523,19 +1783,19 @@ var SMSMap = {
 
                     name:"Hearst Magazines",
                     website:"http://www.hearst.com/magazines",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 },
                 {
 
                     name:"Initiative",
                     website:"http://initiative.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
                     name:"Magnani Caruso Dutton",
                     website:"https://mcdpartners.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
@@ -1568,13 +1828,13 @@ var SMSMap = {
 
                     name:"Tag Worldwide",
                     website:"http://www.tagworldwide.com/en",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
                     name:"Tastemade",
                     website:"https://www.tastemade.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 },
                  {
 
@@ -1645,7 +1905,7 @@ var SMSMap = {
 
                     name:"TwoBolt",
                     website:"http://www.twobolt.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -1660,7 +1920,7 @@ var SMSMap = {
 
                     name:"Digitas Health",
                     website:"http://www.digitashealth.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -1694,13 +1954,13 @@ var SMSMap = {
 
                     name:"Martino Flynn",
                     website:"http://www.martinoflynn.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
                     name:"Serius Marketing",
                     website:"http://www.seriusmarketing.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -1775,7 +2035,7 @@ var SMSMap = {
 
                     name:"Archer Communications",
                     website:"http://www.archercom.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
 
@@ -1791,13 +2051,13 @@ var SMSMap = {
 
                     name:"Butler/Till Media",
                     website:"http://butlertill.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
                     name:"Catalyst Direct Inc.",
                     website:"http://catalystinc.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
 
@@ -1831,13 +2091,13 @@ var SMSMap = {
 
                     name:"Daymon Worldwide",
                     website:"http://www.daymon.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                 {
 
                     name:"Democrat and Chronicle",
                     website:"http://www.democratandchronicle.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 },
                  {
 
@@ -1870,7 +2130,7 @@ var SMSMap = {
 
                     name:"Envative",
                     website:"http://www.envative.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 },
                  {
 
@@ -1930,7 +2190,7 @@ var SMSMap = {
 
                     name:"Partners + Napier",
                     website:"http://www.partnersandnapier.com/",
-                    indsutry:"Agency"
+                    indsutry:"Advertising"
                 },
                 {
 
@@ -2047,7 +2307,7 @@ var SMSMap = {
 
                     name:"Rochester Software Associates",
                     website:"http://www.rocsoft.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 },
                 {
 
@@ -2070,7 +2330,7 @@ var SMSMap = {
 
                     name:"Valpak Rochester",
                     website:"https://www.valpakrochester.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 },
                  {
 
@@ -2082,7 +2342,7 @@ var SMSMap = {
 
                     name:"Xerox Corporation - Roch-S Clinton",
                     website:"http://www.xerox.com/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 },
                 {
 
@@ -2145,7 +2405,7 @@ var SMSMap = {
 
                     name:"PolySi Technologies",
                     website:"http://www.polysi.com/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -2160,7 +2420,7 @@ var SMSMap = {
 
                     name:"Heidelberger Druckmaschinen",
                     website:"https://www.heidelberg.com/us/en/index.jsp",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -2194,17 +2454,17 @@ var SMSMap = {
             ]
         },
          {
-            city:"Southhampton",
-            state:undefined,
-            lat:50.8995249,
-            long:50.8995249,
-            country:"UK",
+            city:"Toronto",
+            state: "ON",
+            lat:43.649703,
+            long:-79.359883,
+            country:"CA",
             companies:[
               {
 
                     name:"Ryan Edwards",
                     website:"http://www.ryanedwards.ca/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -2262,7 +2522,7 @@ var SMSMap = {
 
                     name:"JMB Marketing",
                     website:"http://www.jmbmarketing.com/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
 
             ]
@@ -2307,7 +2567,7 @@ var SMSMap = {
 
                     name:"Bombadil Publishing",
                     website:"http://www.bombadilpublishing.com/",
-                    industry:"Publications/News/Books"
+                    industry:"Publishing"
                 }
             ]
         },
@@ -2372,7 +2632,7 @@ var SMSMap = {
                 }
             ]
         },
-         {
+        /* {
             city:"Valencia",
             state:"CA",
             lat:34.4560442,
@@ -2381,12 +2641,12 @@ var SMSMap = {
             companies:[
                {
 
-                    name:"Ryan Edwards Communications - Cunard",
+                    name:"Ryan Edwards Communications - Cunard", //DONT THINK THIS EXISTS
                     website:"http://www.ryanedwards.ca/",
                     industry:"Print"
                 }
             ]
-        },
+        },*/
          {
             city:"Vero Beach",
             state:"FL",
@@ -2397,7 +2657,7 @@ var SMSMap = {
                {
 
                     name:"DHI",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -2412,7 +2672,7 @@ var SMSMap = {
 
                     name:"Cazbah",
                     website:"http://www.cazbah.net/",
-                    industry:"Agency"
+                    industry:"Advertising"
                 }
             ]
         },
@@ -2466,7 +2726,7 @@ var SMSMap = {
 
                     name:"Protected Images LLC",
                     website:"http://www.protectedimages.com/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 },
                 {
 
@@ -2477,13 +2737,13 @@ var SMSMap = {
 
                     name:"Xerox Corporation - Graphic Communications Business Group",
                     website:"http://www.xerox.com/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 },
                 {
 
                     name:"Xerox Corporation - Supervisors",
                     website:"http://www.xerox.com/",
-                    industry:"Vender"
+                    industry:"Vendor"
                 }
             ]
         },
@@ -2526,7 +2786,7 @@ var SMSMap = {
 
                     name:"Incite Solutions",
                     website:"http://www.inciteoffice.com/",
-                    industry:"Mobile/Software"
+                    industry:"Software"
                 }
             ]
         },
