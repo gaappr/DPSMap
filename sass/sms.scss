@@ -85,10 +85,11 @@ body {
 
 
 .filter-position {
-  height: 100%;
-  margin-left: 3%;
-  width: 30%;
-  float: left;
+    //height: 100%;
+    margin-left: 4%;
+    width: 44%;
+    float: left;
+    height: 64%;
 
   &.state {
 
@@ -100,7 +101,7 @@ body {
 
 
 .filter-selection {
-  height: 275px;//CHANGE make dynamic later and a bunch more lldsofaosjfklsad
+  height: 79%;//CHANGE make dynamic later and a bunch more lldsofaosjfklsad
   overflow: auto;
   //width: 25%;
   text-align: center;
@@ -120,6 +121,10 @@ body {
 
   .current{
     background-color: #00adee;
+  }
+
+  .past {
+    background-color: rgba(255, 120, 0, 0.5);
   }
 
   .current-bad{
@@ -196,12 +201,13 @@ body {
     margin: 30px 0px 10px 0px;
   }
 
+  &.all,
   &.state,
   &.industry{
     font-style: normal;
     margin: 10px 0px;
     width: 100%;
-    float: left;
+    //float: left;
     text-align: center;
 
     span{
@@ -241,5 +247,26 @@ body {
   #sms-map {
     height: 100%;
     width: 100%;
+  }
+}
+
+#all-div {
+
+  p,
+  .list {
+    width: 92%;
+    margin: 0 auto;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 9px 0px;
+    //margin: 0px 0px 3px 0px;
+  }
+
+  .current {
+    background-color: #00adee;
+  }
+
+  .past {
+    background-color: rgba(255, 120, 0, 0.5);
   }
 }

@@ -9,6 +9,13 @@
     <link type="text/css" rel="stylesheet" href="css/jquery-ui.structure.min.css"/>
     <link type="text/css" rel="stylesheet" href="css/jquery-ui.theme.min.css"/>
     <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script> <!-- gets jquery -->
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script> <!-- gets jquery -->
+
+    <script src="js_dps_api/dpsHTMLGestureAPI.min.js"></script>
+    <script src="js_dps_api/api.js"></script>
+    <script src="buttons/js/buttons.js"></script>
     <script src="js/sms_map.js"></script>
 </head>
 <body>
@@ -29,6 +36,13 @@
         <div id="filter">
           <div class="close filter">&#215;</div>
 
+          <div class="filter-special all">
+            <p class="label all"><span>Filter</span></p>
+            <div id="all-div">
+
+            </div>
+          </div>
+
           <div class="filter-position state">
             <p class="label state">Filter by <span>State*</span></p>
             <div class="filter-selection" id="state-div">
@@ -43,9 +57,9 @@
             </div>
           </div>
 
-          <div class="filter-selection" id="state-div-past">
+          <!--<div class="filter-selection" id="state-div-past">
             <div class="label past-filter">Current Map Filter</div>
-          </div>
+          </div>-->
 
           <div class="filter-button" id="filter-calc">
             <p>Filter Now</p>
@@ -65,11 +79,37 @@
           <p>Filter</p>
         </div>
 
+
+        <div class="button nav"><?xml version="1.0" encoding="utf-8"?>
+      <!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+         viewBox="0 0 60 60" enable-background="new 0 0 60 60" xml:space="preserve">
+      <g>
+        <rect x="0.4" y="3.7" fill="#FFFFFF" width="59.5" height="20.1"/>
+        <g>
+          <g>
+            <line fill="none" stroke="#FFFFFF" stroke-width="2" stroke-miterlimit="10" x1="29" y1="46" x2="29" y2="4"/>
+            <g>
+              <polygon fill="#FFFFFF" points="36.4,40.5 29.4,43.5 22.5,40.5 29.4,57"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      </svg>
+    </div>
+
+    <div class="button help">?</div>
+
+
+
+
     </article>
     <script>
         SMSMap.setWrapperSize();
         SMSMap.initiateMap();
-        SMSMap.drawMap();
+        //SMSMap.drawMap();
+        api.setUp();
+        buttons.createButtons();
     </script>
 </body>
 </html>
