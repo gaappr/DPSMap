@@ -50,11 +50,9 @@ var SMSMap = {
 
 
     /**
-     *   initiateMap
      *   Called initially to setup the map - there will be no points on the map initially
      **/
     initiateMap: function () {
-      //console.log(SMSMap.pastFiltered);
       SMSMap.filteredArray = SMSMap.coopData;
 
       SMSMap.drawAllFilter();
@@ -62,9 +60,6 @@ var SMSMap = {
       SMSMap.drawIndustryFilters();
 
       var mapOptions = {
-        //'zoom': 1,
-        //'center': new google.maps.LatLng(38.611563, -98.545487),
-        //'center': new google.maps.LatLng(0, 0),
         'mapTypeControl': false,
         'navigationControl': false,
         'streetViewControl': false,
@@ -156,24 +151,12 @@ var SMSMap = {
 
           SMSMap.filter(tempCurrent);
 
-          //SMSMap.drawMap();
           SMSMap.drawPoints();
 
           SMSMap.clearPastFiltered();
-          //SMSMap.clearPastFiltered("states");
-          //for(var i = SMSMap.pastFiltered.states.length - 1; i > -1; i--){
-           // SMSMap.pastFiltered.states[i].className = "list";
-           // SMSMap.pastFiltered.states.pop();
-          //}
 
           SMSMap.clearCurrentFilteredPushToPast();
-          //SMSMap.clearCurrentFilteredPushToPast("states");
-          //for(var i = SMSMap.currentFiltered.states.length - 1; i > -1; i--){
-          //  SMSMap.currentFiltered.states[i].className = "list";
-          //  SMSMap.pastFiltered.states.push(SMSMap.currentFiltered.states[i]);
 
-          //  SMSMap.currentFiltered.states.pop();
-          //}
           this.id = "filter-calc";
         }
       }
@@ -205,10 +188,9 @@ var SMSMap = {
 
 
     /**
-     * compareArray
-     *   Compares two objects that both have two arrays. Checks for equal length
-     *   and then checks to see if the elements that are passed to it have a
-     *   compareVal and if they are equal. Used to see if user is choosing a new filter or not.
+     * Compares two objects that both have two arrays. Checks for equal length
+     * and then checks to see if the elements that are passed to it have a
+     * compareVal and if they are equal. Used to see if user is choosing a new filter or not.
      * @param {object} objA - first object to compare
      * @param {object} objB - second object to compare
      * @param {object} arrA - first array to compare
@@ -221,13 +203,6 @@ var SMSMap = {
       objA = SMSMap.currentFiltered
       objB = SMSMap.pastFiltered
 
-
-      //console.log(objA);
-      //console.log(objB);
-
-      //arrA = "industry"
-      //arrB = "states";
-      //compareProp = "value";
       //if an object doesn't have an array as a property return false
       if(!objA || !objB){
         //console.log("compare filter selections object doesn't have array");
@@ -239,48 +214,14 @@ var SMSMap = {
         return false;
       }
 
-      //check that array length is greater than one (all arrays are same length )
-      //console.log(objA[0].value);
-      //console.log(objB[0]);
-      //if(objA[arrA].length > 0)
-      //  if(!objA[arrA][0][compareProp] || !objB[arrA][0][compareProp]) return false;
-      //  if(!objA[arrB][0][compareProp] || !objB[arrB][0][compareProp]) return false;
-      //else{
-      ///  return false;
-      //}
-      //
-      //console.log(objA);
-      //console.log(arrA);
-      //console.log(objA[arrA]);
-      //console.log(objB[arrB][0][compareProp]);
-
-      //if(objA[arrA][0]){
-      //  if(objA[arrA][0][compareProp] && !objB[arrA][0][compareProp]){
-      //    //console.log("here Jack");
-      //    return false;
-      //  }
-      //}
-      //if(objA[arrB][0]){
-      //  if(objA[arrB][0][compareProp] && !objB[arrB][0][compareProp]){
-      //    //console.log("here Jack");
-      //    return false;
-      //  }
-      //}
-//
       var tempObjA = [];
       var tempObjB = [];
-//
-//      //var tempObjAB = [];
-      //var tempObjBB = [];
+
 
       for(var i = 0; i < objA.length; i++){
         tempObjA.push(objA[i].value);
         tempObjB.push(objB[i].value);
       }
-
-    //for(var a = 0; a < objA[arrB].length; a++){
-    //  tempObjAB.push(objA[arrB][a][compareProp]);
-    //  tempObjBB.push(objB[arrB][a][compareProp]);
 
       //slice so we do not effect the original
       //sort makes sure they are in order
@@ -288,11 +229,6 @@ var SMSMap = {
       var cA = tempObjA.slice().sort().join(",");
       var cB = tempObjB.slice().sort().join(",");
 
-      //var cAB = tempObjAB.slice().sort().join(",");
-      //var cBB = tempObjBB.slice().sort().join(",");
-
-      //console.log(cA);
-      //console.log(cB);
 
       return cA === cB;// && cAB === cBB;
     },
@@ -336,8 +272,7 @@ var SMSMap = {
 
 
     /**
-     *   drawMap
-     *   parses through the coopData array and adds points to the map with the help of the drawPoint function.
+     * Parses through the coopData array and adds points to the map with the help of the drawPoint function.
      **/
     drawMap: function () {
       //console.log(SMSMap.filteredArray);
@@ -351,18 +286,15 @@ var SMSMap = {
 
 
     /**
-     *   createPoint
-     *   This will actually draw a point on the map and add information about that point to the
-     *   map. Also sets up an onclick listener to enable the viewing of the information in the map
+     * This will actually draw a point on the map and add information about that point to the
+     * map. Also sets up an onclick listener to enable the viewing of the information in the map
      *
-     *   @param lat - the latitude of the point you would like to draw
-     *   @param long - the longitude of the point you would like to draw
-     *   @param arrayLocation - the location in the coopArray you are pulling this point from
-     *   @param bounds - boolean indicating whether the points should be bounded into the map display or not.
+     * @param lat - the latitude of the point you would like to draw
+     * @param long - the longitude of the point you would like to draw
+     * @param arrayLocation - the location in the coopArray you are pulling this point from
+     * @param bounds - boolean indicating whether the points should be bounded into the map display or not.
      **/
     createPoint: function (lat, long, arrayLocation, bounds) {
-      //console.log(lat);
-      //console.log(long);
       var point = {
         'position': new google.maps.LatLng(lat,long),
         'bounds': bounds,
@@ -370,8 +302,6 @@ var SMSMap = {
         'icon': SMSMap.defaultIcon,
       };
       var googlePoint = new google.maps.Marker( point );
-
-      //console.log(point);
 
       google.maps.event.addListener(googlePoint,'click',function(){
         var currentZoom = SMSMap.map.getZoom();
@@ -394,16 +324,12 @@ var SMSMap = {
         SMSMap.drawInfoDiv(arrayLocation);
       });
 
-      //console.log(googlePoint);
       SMSMap.mapPoints.push(googlePoint);
     },
 
 
 
     drawPoints: function(){
-      //console.log(SMSMap.mapPoints);
-      //console.log(SMSMap.map);
-
       for( var i=0; i<SMSMap.mapPoints.length; i++ ){
           //console.log("coleslaw");
           SMSMap.mapPoints[i].setMap(SMSMap.map);
@@ -425,10 +351,8 @@ var SMSMap = {
 
 
     /**
-     *   drawInfoDiv
      *   Actually draws the information regarding each city. This function specifically handles the creation of
      *   the box and the associated styling
-     *
      *   @param arrayLoc - The array location within coopData array that we are going to display on the screen
      **/
     drawInfoDiv: function (arrayLoc) {
@@ -481,10 +405,8 @@ var SMSMap = {
 
 
     /**
-     *   createCityName
      *   Extracts the city and state information from the coopData array and creates an element suitable for placement within
      *   the info div
-     *
      *   @param arrayLoc - The array location within the coopData array that we are going to get the city information from
      **/
     createCityName: function (arrayLoc) {
@@ -506,30 +428,7 @@ var SMSMap = {
         return cityName;
     },
 
-
-
     /**
-     *   addTextTouchEffect
-     *   Adds an effect to the text that is called when a button is touched on a phone. Any text-based element can
-     *   be passed into the function and the effect will be added. This is a utility function to ensure all elements have
-     *   the same effect for consistency
-     *
-     *   @param el - the text element the touch effects should be added to
-     **/
-    /*
-    addTextTouchEffect: function (el) {
-        el.ontouchstart = function () {
-            el.style.color = SMSMap.effectColor;
-        }
-        el.ontouchend = function () {
-            el.style.color = SMSMap.textColor;
-        }
-    },*/
-
-
-
-    /**
-     *
      * filters the coopData based on an input string
      * @param currentStrings - array of values of objects in the currentFiltered array
      **/
@@ -562,22 +461,9 @@ var SMSMap = {
             }
           }
         }
-
-        /*
-        for (c = 0; c < SMSMap.coopData.length; c++) {  //for every object in main data object
-          for (d = 0; d < SMSMap.coopData[c].companies.length; d++) {  //for every company in that object (object = different city)
-            //if that company industry is in the filter, create a point for that city
-            if (currentStrings.indexOf(SMSMap.coopData[c].companies[d].industry) != -1) {
-              SMSMap.createPoint(SMSMap.coopData[c].lat, SMSMap.coopData[c].long, c, true);
-            }
-          }
-        }*/
       } else {
         tempStateArr = [];
         tempStatePos = [];
-
-        //for(var a = 0; a < filteredObj.states.length; a++){
-        //  stateString = filteredObj.states[a].value;
 
           for (i = 0; i < SMSMap.coopData.length; i++) {
             if (currentStrings.indexOf(SMSMap.coopData[i].state) != -1) {
@@ -585,22 +471,13 @@ var SMSMap = {
               tempStatePos.push(i);
             }
           }
-        //}
-
-        console.log(tempStateArr);
-
-        console.log(tempStatePos);
 
         if (tempStateArr.length > 0) {
-          //for(var b = 0; b < filteredObj.industry.length; b++){
-          //  industryString = filteredObj.industry[b].value;
 
             for (c = 0; c < SMSMap.coopData.length; c++) {
-              //for (d = 0; d < tempStateArr[c].companies.length; d++) {
                 if (currentStrings.indexOf(SMSMap.coopData[c].state) != -1) {
                   SMSMap.createPoint(SMSMap.coopData[c].lat, SMSMap.coopData[c].long, tempStatePos[c], true);
                 }
-              //}
             }
 
             for (e = 0; e < SMSMap.coopData.length; e++) {  //for every object in main data object
@@ -622,77 +499,6 @@ var SMSMap = {
             }
           }
         }
-
-      /*
-
-      if (currentFiltered.states.length > 0 && currentFiltered.industry.length < 1) {
-        for (var a = 0; a < currentFiltered.states.length; a++){
-          stateString = currentFiltered.states[a].value;
-
-          for (i = 0; i < SMSMap.coopData.length; i++) {
-            if (SMSMap.coopData[i].state == stateString || stateString == "All") {
-              //console.log("co-op filtered by state: " + SMSMap.coopData[i]);
-              SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
-            }
-          }
-        }
-      }
-
-
-
-      else if (currentFiltered.states.length < 1 && currentFiltered.industry.length > 0) {
-        for (var b = 0; b < currentFiltered.industry.length; b++) {
-          industryString = currentFiltered.industry[b].value;
-
-          for (c = 0; c < SMSMap.coopData.length; c++) {
-            for (d = 0; d < SMSMap.coopData[c].companies.length; d++) {
-              if (SMSMap.coopData[c].companies[d].industry == industryString || industryString == "All") {
-                //console.log( "co-op filtered by industry: " + SMSMap.coopData[c]);
-                SMSMap.createPoint(SMSMap.coopData[c].lat, SMSMap.coopData[c].long, c, true);
-              }
-            }
-          }
-        }
-      }
-
-      else{
-        tempStateArr = [];
-        tempStatePos = []
-
-        for(var a = 0; a < filteredObj.states.length; a++){
-          stateString = filteredObj.states[a].value;
-
-          for (i = 0; i < SMSMap.coopData.length; i++) {
-            if (SMSMap.coopData[i].state == stateString || stateString == "All") {
-              //SMSMap.createPoint(SMSMap.coopData[i].lat, SMSMap.coopData[i].long, i, true);
-              tempStateArr.push(SMSMap.coopData[i]);
-              tempStatePos.push(i);
-            }
-          }
-        }
-
-        //console.log(tempStateArr);
-        //console.log(tempStatePos);
-
-        if(tempStateArr.length > 0){
-          for(var b = 0; b < filteredObj.industry.length; b++){
-            industryString = filteredObj.industry[b].value;
-
-            for (c = 0; c < tempStateArr.length; c++) {
-              for(d = 0; d < tempStateArr[c].companies.length; d++){
-                if(tempStateArr[c].companies[d].industry == industryString){ //|| industryString == "All"){
-                  SMSMap.createPoint(tempStateArr[c].lat, tempStateArr[c].long, tempStatePos[c], true);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      */
-
-
-        //console.log(SMSMap.mapPoints);
         SMSMap.filterPosition();//MONDAY...change this to bounds [http://stackoverflow.com/questions/19304574/center-set-zoom-of-map-to-cover-all-markers-visible-markers]
     },
 
@@ -734,16 +540,6 @@ var SMSMap = {
         SMSMap.map.setZoom(currentZoom < 6 ? 6 : currentZoom);
         SMSMap.map.setCenter(markers[0].getPosition());
       }
-
-      //if(stateString === "All"){
-      //  SMSMap.map.setCenter(new google.maps.LatLng(38.611563, -98.545487));
-      //  SMSMap.map.setZoom(3);
-      //}else{
-      //  SMSMap.map.setCenter(new google.maps.LatLng(avgLat, avgLng));
-      //  SMSMap.map.setZoom(3);
-      //}
-
-
     },
 
 
@@ -784,76 +580,10 @@ var SMSMap = {
           stateP.appendChild(document.createTextNode(states[i]));
           stateFilter.appendChild(stateP);
 
-          //puts "All" as the past selected filter on creation of map
-          //if(stateP.value === "All"){
-            //SMSMap.pastFiltered[0] = stateP;
-            //var tempState = document.createElement("p");
-            //tempState.value = states[i];
-            //tempState.appendChild(document.createTextNode(states[i]));
-            //document.getElementById("state-div-past").appendChild(tempState); //take this out
-          //}
 
           stateP.onclick = function(){
             SMSMap.filterConditions(this);
-          } //function(){}
-/*          var filterNow = document.getElementById("filter-calc");
-            var filterNowReady = document.getElementById("filter-calc-ready");
-            var current = SMSMap.currentFiltered.states;
-
-            if(this.className === "list"){
-              this.className = "current";
-              current.push(this);
-
-              if(filterNow && !SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value")){
-                filterNow.id = "filter-calc-ready";
-                filterNowReady = filterNow;
-                filterNow = null;
-              }
-            }else{
-              var tempIndex = current.indexOf(this);
-
-              if(tempIndex > -1){
-                current.splice(tempIndex, 1);
-              }
-              this.className = "list";
-            }
-
-            if((current.length < 1 && filterNowReady) || filterNowReady && SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value")){
-              filterNowReady.id = "filter-calc";
-              filterNow = filterNowReady;
-              filterNowReady = null;
-            }
-
-            //if current and past selections are equal
-            if(SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value")){
-
-              //show class that warns user that they have same past and current selections
-              document.getElementsByClassName("filter-warning")[0].style.opacity = 1;
-
-              //changes class of redundant filter selections...need tempLength
-              //because tempCurrent.length changes on every for loop iteration
-              //(new class includes color change to show error)
-              var tempCurrent =  document.getElementsByClassName("current");
-              var tempLength = tempCurrent.length;
-              for(i = 0; i < tempLength; i++) {
-                tempCurrent[0].className = "current-bad";
-              }
-
-            //else if current and past selections are not equal OR there are no current selections
-            }else if(!SMSMap.compareFilterSelections(current, SMSMap.pastFiltered.states, "value") || current.length < 1){
-
-              //hide class that warns user that they have same past and current selections
-              document.getElementsByClassName("filter-warning")[0].style.opacity = 0;
-
-              //changes class of previously redundant filter selections (if present)
-              //...need tempLength because tempCurrent.length changes on every
-              //for-loop iteration (changes back to default selected class)
-              var tempCurrent = document.getElementsByClassName("current-bad");
-              var tempLength = tempCurrent.length;
-              for(i = 0; i < tempLength; i++) {
-                tempCurrent[0].className = "current";
-              }
-            }                                                           */
+          }
         }
     },
 
@@ -875,7 +605,6 @@ var SMSMap = {
           var tempIndustry = document.createElement("p");
           tempIndustry.value = industries[i];
           tempIndustry.appendChild(document.createTextNode(industries[i]));
-          //document.getElementById("state-div-past").appendChild(tempIndustry);
         }
 
         industryP.onclick = function(){
@@ -887,18 +616,6 @@ var SMSMap = {
 
 //pass 'this' (stateP..dom element) ..type = industry or state or ALL
     filterConditions: function(listItem){
-      //console.log("filterListeners");
-      //console.log(listItem);
-
-      //var allMapPoints;
-      //if (SMSMap.filterIsStringInCurrent("All Map Points")) {
-      //  SMS
-      //}
-      //var allStates;
-
-      console.log(SMSMap.currentFiltered);
-      //console.log(SMSMap.currentFiltered.toString());
-
       if (SMSMap.filterNow) {
         var filterNow = SMSMap.filterNow;
       } else {
@@ -944,11 +661,6 @@ var SMSMap = {
           if (SMSMap.filterIsStateInCurrent(tempCurrentArr[i])) {
             SMSMap.filterDelete(tempCurrentArr[i]);
           }
-          //for (x = 0; x < SMSMap.stateArray.length; x++){
-            //if (currentFiltered[i].value === SMSMap.stateArray[x]) {
-            //  SMSMap.filterDelete(currentFiltered[i]);
-            //}
-          //}
         }
         SMSMap.filterAdd(listItem);
         SMSMap.allStates = true;
@@ -973,49 +685,6 @@ var SMSMap = {
         }
       }
 
-      //var filterNow = document.getElementById("filter-calc");  //CHANGE, don't need to reference dom everytime
-      //var filterNowReady = document.getElementById("filter-calc-ready");
-      //SMSMap.currentFiltered
-      //var SMSMap.pastFiltered = SMSMap.pastFiltered;
-/*
-      if (listItem.value != "All Map Points" && SMSMap.currentFiltered[0].value == "All Map Points") {
-        console.log("jimmy");
-        SMSMap.currentFiltered = [];
-      }
-      console.log(SMSMap.currentFiltered);
-      console.log(SMSMap.currentFiltered);
-
-      if (listItem.className === "list") {
-        listItem.className = "current";
-
-        SMSMap.currentFiltered.push(listItem);
-        for(i = 0; i < SMSMap.pastFiltered.length; i++) {
-          SMSMap.pastFiltered[i].className = "past";
-        }
-      } else if (listItem.className === "current") {
-        //if (SMSMap.pastFiltered.indexOf(listItem) == -1) {
-          var tempIndex = SMSMap.currentFiltered.indexOf(listItem);
-
-            if(tempIndex > -1){
-              SMSMap.currentFiltered.splice(tempIndex, 1);
-            }
-          listItem.className = "list";
-        //}
-      }
-      if (SMSMap.compareFilterSelections()) {
-        for(i = 0; i < SMSMap.pastFiltered.length; i++) {
-          SMSMap.pastFiltered[i].className = "current";
-        }
-      }
-
-      if(SMSMap.currentFiltered.length == 0) {
-        for(i = 0; i < SMSMap.pastFiltered.length; i++) {
-          SMSMap.pastFiltered[i].className = "current";
-          SMSMap.currentFiltered[i] = SMSMap.pastFiltered[i];
-        }
-      }
-      */
-
       if(filterNow && !SMSMap.compareFilterSelections()){
         filterNow.id = "filter-calc-ready";
         filterNowReady = filterNow;
@@ -1028,48 +697,16 @@ var SMSMap = {
         filterNow = filterNowReady;
         filterNowReady = null;
       }
-
-/*
-      //if current and past selections are equal
-      if(SMSMap.compareFilterSelections()){
-        //show class that warns user that they have same past and current selections
-        document.getElementsByClassName("filter-warning")[0].style.opacity = 1;
-
-        //changes class of redundant filter selections...need tempLength
-        //because tempCurrent.length changes on every for loop iteration
-        //(new class includes color change to show error)
-        var tempCurrent =  document.getElementsByClassName("current");
-        var tempLength = tempCurrent.length;
-        for(i = 0; i < tempLength; i++) {
-          tempCurrent[0].className = "current-bad";
-        }
-
-      //else if current and past selections are not equal OR there are no current selections
-      }else if(!SMSMap.compareFilterSelections() || current.length < 1){
-        //hide class that warns user that they have same past and current selections
-        document.getElementsByClassName("filter-warning")[0].style.opacity = 0;
-
-        //changes class of previously redundant filter selections (if present)
-        //...need tempLength because tempCurrent.length changes on every
-        //for-loop iteration (changes back to default selected class)
-        var tempCurrent = document.getElementsByClassName("current-bad");
-        var tempLength = tempCurrent.length;
-        for(i = 0; i < tempLength; i++) {
-          tempCurrent[0].className = "current";
-        }
-      }
-      */
     },
 
     filterAdd: function (listItem) {
-  //    console.log(listItem);
-  //    console.log("^ add to current");
+
       SMSMap.currentFiltered.push(listItem);
       listItem.className = "current";
     },
 
     filterClear: function () {
-  //    console.log("clear current");
+
       for (i = 0; i < SMSMap.currentFiltered.length; i++) {
         SMSMap.currentFiltered[i].className = "list";
       }
@@ -1077,9 +714,7 @@ var SMSMap = {
     },
 
     filterDelete: function (listItem) {
-  //    console.log(listItem);
-  //    console.log("^ remove from current");
-  //    console.log("is it in? " + SMSMap.filterIsInCurrent(listItem));
+
       if ( SMSMap.filterIsInCurrent(listItem) ) {
         var tempIndex = SMSMap.currentFiltered.indexOf(listItem);
         SMSMap.currentFiltered.splice(tempIndex, 1);
@@ -1110,8 +745,7 @@ var SMSMap = {
     },
 
     filterIsStateInCurrent: function (currentItem) {
-      //for (i = 0; i < currentFiltered.length; i++) {
-    //    console.log(currentItem.value)
+
         for (x = 0; x < SMSMap.stateArray.length; x++){
           if (currentItem.value === SMSMap.stateArray[x]) {
             return true;
@@ -1153,7 +787,6 @@ var SMSMap = {
         stateArray[allPos] = temp;
       }
 
-  //    console.log(stateArray);
       SMSMap.stateArray = stateArray;
       return stateArray;
     },
@@ -1166,7 +799,6 @@ var SMSMap = {
      **/
     createIndustryList: function () {
       var industryArray = [];
-      //industryArray.push("All");
       for (a = 0; a < SMSMap.coopData.length; a++) {
         for (i = 0; i < SMSMap.coopData[a].companies.length; i++)
           if (industryArray.indexOf(SMSMap.coopData[a].companies[i].industry) === -1 && SMSMap.coopData[a].companies[i].industry != undefined) {
@@ -1175,16 +807,7 @@ var SMSMap = {
       }
 
       industryArray.sort();
-/*
-      if(industryArray.indexOf("All") != 0){
-        var allPos = industryArray.indexOf("All");
-        var temp = industryArray[0];
 
-        industryArray[0] = "All";
-        industryArray[allPos] = temp;
-      }
-*/
-  //    console.log(industryArray);
       SMSMap.industryArray = industryArray;
       return industryArray;
     },
