@@ -476,7 +476,7 @@ var SMSMap = {
 
             for (c = 0; c < SMSMap.coopData.length; c++) {
                 if (currentStrings.indexOf(SMSMap.coopData[c].state) != -1) {
-                  SMSMap.createPoint(SMSMap.coopData[c].lat, SMSMap.coopData[c].long, tempStatePos[c], true);
+                  SMSMap.createPoint(SMSMap.coopData[c].lat, SMSMap.coopData[c].long, c, true);
                 }
             }
 
