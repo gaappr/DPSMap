@@ -1,3 +1,4 @@
+
 var SMSMap = {
 
     backgroundColor: "rgba(0,0,0,0.75)",
@@ -53,7 +54,9 @@ var SMSMap = {
      *   Called initially to setup the map - there will be no points on the map initially
      **/
     initiateMap: function () {
-      SMSMap.filteredArray = SMSMap.coopData;
+      //SMSMap.filteredArray = SMSMap.coopData;
+      SMSMap.filteredArray = [];
+      SMSMap.filteredArrayOriginalLocation = [];
 
       SMSMap.drawAllFilter();
       SMSMap.drawStateFilters();
@@ -93,7 +96,7 @@ var SMSMap = {
     addListeners: function(){
       var closeButton = document.getElementsByClassName("close");
       var filterDisplayButton = document.getElementById("filter-display");
-      var filterCalc = document.getElementById("filter-calc");
+      var filterCalc = SMSMap.filterMainButton = document.getElementById("filter-calc");
 
       //zoom change event listener for entire map
       google.maps.event.addListener(SMSMap.map, "zoom_changed", function(){
@@ -138,9 +141,16 @@ var SMSMap = {
 
       filterCalc.onclick = function(){
         //if((SMSMap.currentFiltered.states.length > 0 || SMSMap.currentFiltered.industry.length > 0) && this.id === "filter-calc-ready"){
+        console.log( SMSMap.filterAllowed );
+        if ( SMSMap.filterAllowed === true ) {
+          SMSMap.doFilter();
+          SMSMap.testfilterUpdatePast();
+        }
+          /*
         if((SMSMap.currentFiltered.length > 0) && this.id === "filter-calc-ready"){
 
           SMSMap.doFilter();
+          */
 
           var tempCurrent = [];
           var current = SMSMap.currentFiltered;
@@ -152,13 +162,15 @@ var SMSMap = {
           SMSMap.filter(tempCurrent);
 
           SMSMap.drawPoints();
-
+/*
           SMSMap.clearPastFiltered();
 
           SMSMap.clearCurrentFilteredPushToPast();
 
           this.id = "filter-calc";
         }
+
+        */
       }
 
       //also save a reference to the filter display button and div for later use
@@ -325,6 +337,7 @@ var SMSMap = {
       });
 
       SMSMap.mapPoints.push(googlePoint);
+      //console.log( SMSMap.coopData[ arrayLocation ] );
     },
 
 
@@ -382,14 +395,14 @@ var SMSMap = {
         //infoDiv.appendChild(SMSMap.createInfoClose());
         cityHolder.appendChild(SMSMap.createCityName(arrayLoc));
 
-        if (SMSMap.filteredArray[arrayLoc].companies.length > 0) {
+        if (SMSMap.coopData[arrayLoc].companies.length > 0) {
 
-            for (var i = 0; i < SMSMap.filteredArray[arrayLoc].companies.length; i++) {
+            for (var i = 0; i < SMSMap.coopData[arrayLoc].companies.length; i++) {
                 var companyLink = document.createElement("a");
                 companyLink.className = "company-link";
-                companyLink.href = SMSMap.filteredArray[arrayLoc].companies[i].website;
+                companyLink.href = SMSMap.coopData[arrayLoc].companies[i].website;
 
-                companyLink.appendChild(document.createTextNode(SMSMap.filteredArray[arrayLoc].companies[i].name));
+                companyLink.appendChild(document.createTextNode(SMSMap.coopData[arrayLoc].companies[i].name));
                 //SMSMap.addTextTouchEffect(companyLink);
                 companiesHolder.appendChild(companyLink);
             }
@@ -414,9 +427,9 @@ var SMSMap = {
 
 
         var cityName = document.createElement("h1");
-        var city = SMSMap.filteredArray[arrayLoc].city;
-        var state = SMSMap.filteredArray[arrayLoc].state;
-        var country = SMSMap.filteredArray[arrayLoc].country;
+        var city = SMSMap.coopData[arrayLoc].city;
+        var state = SMSMap.coopData[arrayLoc].state;
+        var country = SMSMap.coopData[arrayLoc].country;
         var cityString = city;
         if (state) {
             cityString += ", " + state;
@@ -432,15 +445,40 @@ var SMSMap = {
      * filters the coopData based on an input string
      * @param currentStrings - array of values of objects in the currentFiltered array
      **/
-    filter: function (currentStrings) {         //MONDAY...make filter work for industry as well
+    filter: function (currentStrings) {         //MONDAY...make filter work for industry as well+
 
       SMSMap.clearMap();
 
+      console.log( SMSMap.filteredArray );
+
+      SMSMap.filteredArray = [];
+
+      console.log( SMSMap.filteredArray );
+      SMSMap.filteredArrayOriginalLocation = [];
+
       console.log(currentStrings);
 
-      if (currentStrings.indexOf("All Map Points") != -1) {
-        SMSMap.drawMap();
-      } else if (currentStrings.indexOf("All States") != -1) {
+      if( SMSMap.filterDetermineFilter( currentStrings ) == "all" ) {
+        console.log("jacki");
+        SMSMap.filterAllMapPoints();
+      } else if ( SMSMap.filterDetermineFilter( currentStrings ) == "allStates" ) {
+        console.log("bullick");
+        SMSMap.filterAllStates( currentStrings );
+      } else if ( SMSMap.filterDetermineFilter( currentStrings ) == "hasStates" ) {
+        console.log("there be states in here");
+        SMSMap.filterByState( currentStrings );
+      } else {
+        SMSMap.filterByIndustry( currentStrings );
+      }
+
+      //write the filter check states with below vvv
+      //
+      //
+
+
+/*
+
+      else if (currentStrings.indexOf("All States") != -1) {
         var tempStateHolder = [];
         for (a = 0; a < SMSMap.coopData.length; a++) {
           if (SMSMap.coopData[a].state) {
@@ -461,7 +499,12 @@ var SMSMap = {
             }
           }
         }
-      } else {
+      }
+      */
+
+     /*
+
+      else {
         tempStateArr = [];
         tempStatePos = [];
 
@@ -500,8 +543,127 @@ var SMSMap = {
           }
         }
         SMSMap.filterPosition();//MONDAY...change this to bounds [http://stackoverflow.com/questions/19304574/center-set-zoom-of-map-to-cover-all-markers-visible-markers]
+
+        */
     },
 
+    filterDetermineFilter: function( currentStrings ) {
+      if ( currentStrings.indexOf("All Map Points") != -1 ) {
+        return "all";
+      } else if ( currentStrings.indexOf("All States") != -1 ) {
+        console.log("bob");
+        return "allStates";
+      } else if ( SMSMap.filterMatchStateString( currentStrings ) === true ) {
+        return "hasStates";
+      }
+    },
+
+    filterMatchStateString: function( currentStrings ) {
+      var arr = SMSMap.stateArray
+        , currStrs = currentStrings;
+
+      for ( var i = 0; i < currStrs.length; i++ ){
+        if ( arr.indexOf( currStrs[i] ) != -1 ) {
+          return true;
+        }
+      }
+    },
+
+    filterMatchIndustryString: function( currentStrings ) {
+      var arr = SMSMap.industryArray
+        , currStrs = currentStrings;
+
+      for ( var i = 0; i < currStrs.length; i++ ){
+        if ( arr.indexOf( currStrs[i] ) != -1 ) {
+          return true;
+        }
+      }
+    },
+
+    filterAllMapPoints: function() {
+      SMSMap.drawMap();
+      SMSMap.filterPosition();
+    },
+
+    filterAllStates: function ( currentStrings ) {
+      for ( var a = 0; a < SMSMap.coopData.length; a++) {
+        if ( SMSMap.coopData[a].state ) {
+            SMSMap.filteredArray.push( SMSMap.coopData[a] );
+            SMSMap.filteredArrayOriginalLocation.push( a );
+        }
+      }
+
+      if ( currentStrings.length > 1 ) {
+        SMSMap.filterCheckIndustry( currentStrings, SMSMap.filteredArray, SMSMap.filteredArrayOriginalLocation );
+      }
+
+      SMSMap.filterCreatePoints( SMSMap.filteredArray, SMSMap.filteredArrayOriginalLocation );
+    },
+
+    filterByState: function ( currentStrings ) {
+      var data = SMSMap.coopData;
+
+      for ( var a = 0; a < data.length; a++) {
+        if ( currentStrings.indexOf( data[a].state ) != -1 ) {
+          console.log(data[a]);
+          SMSMap.filteredArray.push( SMSMap.coopData[a] );
+          SMSMap.filteredArrayOriginalLocation.push( a );
+        }
+      }
+
+      if ( SMSMap.filterMatchIndustryString( currentStrings ) === true ) {
+        SMSMap.filterCheckIndustry( currentStrings, SMSMap.filteredArray, SMSMap.filteredArrayOriginalLocation );
+      }
+
+      console.log(SMSMap.filteredArray);
+
+      SMSMap.filterCreatePoints( SMSMap.filteredArray, SMSMap.filteredArrayOriginalLocation );
+
+    },
+
+    filterByIndustry: function ( currentStrings ) {
+      var data = SMSMap.coopData;
+
+      for ( var i = 0; i < data.length; i++) {
+        for ( var a = 0; a < data[i].companies.length; a++ ) {
+          if ( currentStrings.indexOf( data[i].companies[a].industry ) != -1) {
+            SMSMap.filteredArray.push( data[i] );
+            SMSMap.filteredArrayOriginalLocation.push( i );
+          }
+        }
+      }
+
+      SMSMap.filterCreatePoints( SMSMap.filteredArray, SMSMap.filteredArrayOriginalLocation );
+    },
+
+    filterCheckIndustry: function ( currentStrings, filtArr, origLocArr ) {
+      var spliced = false;
+      for ( var i = 0; i < filtArr.length; i++ ) {  //for every company in that object (object = different city)
+
+        for ( var a = 0; a < filtArr[i].companies.length; a++ ) {
+          if ( currentStrings.indexOf( filtArr[i].companies[a].industry ) != -1) {
+            console.log( filtArr[i].companies[a].industry );
+            break;
+          } else if ( a == filtArr[i].companies.length - 1 ) {
+            filtArr[i].createPoint = false;
+          }
+        }
+      }
+
+      //SMSMap.filterCreatePoints( filtArr, origLocArr );
+    },
+
+    filterCreatePoints: function ( filtArr, origLocArr ) {
+      for( var i = 0; i < filtArr.length; i++ ) {
+        if ( filtArr[i].createPoint !== false ) {
+          SMSMap.createPoint(filtArr[i].lat, filtArr[i].long, origLocArr[i], true);
+          console.log(filtArr[i]);
+        } else {
+          filtArr[i].createPoint = undefined;
+        }
+      }
+      SMSMap.filterPosition();
+    },
 
 
     clearMap: function(){
@@ -559,7 +721,8 @@ var SMSMap = {
           SMSMap.allMapPoints = true;
 
           allP.onclick = function(){
-            SMSMap.filterConditions(this);
+            //SMSMap.filterConditions(this);
+            SMSMap.testManageSelectedFilters( this );
           }
     },
 
@@ -582,7 +745,8 @@ var SMSMap = {
 
 
           stateP.onclick = function(){
-            SMSMap.filterConditions(this);
+            //SMSMap.filterConditions(this);
+            SMSMap.testManageSelectedFilters( this );
           }
         }
     },
@@ -608,7 +772,8 @@ var SMSMap = {
         }
 
         industryP.onclick = function(){
-          SMSMap.filterConditions(this);
+          //SMSMap.filterConditions(this);
+          SMSMap.testManageSelectedFilters( this );
         }
       }
     },
@@ -811,6 +976,183 @@ var SMSMap = {
       SMSMap.industryArray = industryArray;
       return industryArray;
     },
+
+
+    testManageSelectedFilters: function ( touched ) {
+      var filterButton = SMSMap.filterMainButton;
+
+      SMSMap.filterAllowed = false;
+
+      SMSMap.testFilterCompareCurrent( touched );
+
+
+
+
+
+
+
+
+
+      if ( SMSMap.testfilterPastSameAsCurrent() || SMSMap.currentFiltered.length === 0 ) {
+        console.log( "dontallowfilter" );
+        SMSMap.testChangeAllowFilter( filterButton, false );
+      } else {
+        console.log( "AllowFilter" );
+        SMSMap.testChangeAllowFilter( filterButton, true );
+      }
+    },
+
+    testFilterCompareCurrent: function ( touched ) {
+      var ind = SMSMap.currentFiltered.indexOf( touched );
+
+
+      if ( ind === -1 ) {
+
+        SMSMap.testfilterChangeAllMapPoints( touched );
+        SMSMap.testfilterChangeAllStates( touched );
+
+        SMSMap.currentFiltered.push( touched );
+        SMSMap.testfilterChangeSelected( touched, true );
+      } else {
+        SMSMap.currentFiltered.splice( ind, 1);
+        SMSMap.testfilterChangeSelected( touched, false );
+      }
+
+    },
+
+    testfilterChangeAllMapPoints: function ( touched ) {
+      console.log( touched.value.length );
+      if ( touched.value === "All Map Points" ) {
+        for (i = 0; i < SMSMap.currentFiltered.length; i++) {
+          SMSMap.currentFiltered[i].className = "list";
+        }
+        SMSMap.currentFiltered = [];
+        SMSMap.allMapPoints = true;
+
+      } else if( SMSMap.allMapPoints ) {
+        for ( var a = 0; a < SMSMap.currentFiltered.length; a++ ) {
+          if ( SMSMap.currentFiltered[a].value === "All Map Points" ) {
+            SMSMap.currentFiltered[a].className = "list";
+            SMSMap.currentFiltered.splice( a, 1 );
+            SMSMap.allMapPoints = false;
+            break;
+          }
+        }
+      }
+    },
+
+    testfilterChangeAllStates: function ( touched ) {
+      if ( touched.value === "All States" ) {
+        var tempArr = [];
+
+        for( var b = 0; b < SMSMap.currentFiltered.length; b++ ) {
+          tempArr[b] = SMSMap.currentFiltered[b];
+        }
+
+        console.log( tempArr );
+
+        for (i = 0; i < tempArr.length; i++) {
+          if ( tempArr[i].value.length === 2 ) { // change  --- this is a bad way of determining if it is state...should have function to compare 'touched.value' to stateArray
+            console.log( tempArr[i] );
+            console.log( SMSMap.currentFiltered.indexOf( tempArr[i] ) );
+
+            var location = SMSMap.currentFiltered.indexOf( tempArr[i] );
+            if ( location != -1 ) {
+              SMSMap.currentFiltered[ location ].className = "list";
+              SMSMap.currentFiltered.splice( location, 1 );
+            }
+          }
+        }
+        SMSMap.allStates = true;
+      } else if ( SMSMap.allStates ) {
+        if ( touched.value.length === 2 ) { // change  --- this is a bad way of determining if it is state...should have function to compare 'touched.value' to stateArray
+          for ( var a = 0; a < SMSMap.currentFiltered.length; a++ ) {
+            if ( SMSMap.currentFiltered[a].value === "All States" ) {
+              SMSMap.currentFiltered[a].className = "list";
+              SMSMap.currentFiltered.splice( a, 1 );
+              SMSMap.allStates = false;
+              break;
+            }
+          }
+        }
+      }
+    },
+
+    testfilterChangeSelected: function ( touched, action ) {
+      if ( action === true ) {
+        touched.className = "current";
+      } else {
+        touched.className = "list";
+      }
+    },
+
+
+    testfilterPastSameAsCurrent: function () {
+      var curr = SMSMap.currentFiltered;
+      var past = SMSMap.pastFiltered;
+
+
+      if ( curr.length != past.length ) {
+        console.log( "shit is different length ");
+        return false;
+      }
+
+      for ( var i = 0; i < curr.length; i++ ) {
+        if ( past.indexOf( curr[i] ) == -1 ) {
+          console.log( "something in current is not in past" );
+          return false;
+        }
+      }
+      console.log( "shit's the same yo" );
+      return true;
+    },
+
+
+    testChangeAllowFilter: function ( button, action ) {
+      if ( action === true ) {
+        button.id = "filter-calc-ready";
+        SMSMap.filterAllowed = true;
+      } else {
+        button.id = "filter-calc";
+        SMSMap.filterAllowed = false;
+      }
+    },
+
+    testfilterUpdatePast: function () {
+      //var curr = SMSMap.currentFiltered;
+      //var SMSMap.pastFiltered = SMSMap.SMSMap.pastFilteredFiltered;
+
+
+      SMSMap.pastFiltered = [];
+
+      for ( var i = 0; i < SMSMap.currentFiltered.length; i++ ) {
+        SMSMap.pastFiltered.push( SMSMap.currentFiltered[i] );
+      }
+
+      SMSMap.testChangeAllowFilter( SMSMap.filterMainButton, false );
+
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

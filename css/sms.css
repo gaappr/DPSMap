@@ -8,7 +8,8 @@ html {
 body {
   margin: 0px;
   padding: 0px;
-  font-family: "Nunito", sans-serif; }
+  font-family: "Nunito", sans-serif;
+  overflow: hidden; }
 
 .company-link {
   background-color: rgba(255, 255, 255, 0.1);
