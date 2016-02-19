@@ -15,46 +15,60 @@
 
     <!--<script src="js_dps_api/dpsHTMLGestureAPI.min.js"></script>
     <script src="js_dps_api/api.js"></script>-->
-    <script src="buttons/js/buttons.js"></script>
+    <script src="js/dps_api/dpsHTMLGestureAPI.min.js"></script>
+    <script src="js/dps_api/api.js"></script>
+    <script src="js/back.js"></script>
+    <!--<script src="buttons/js/buttons.js"></script>-->
     <script src="js/sms_map.js"></script>
+    <script src="js/scrollArrows.js"></script>
 </head>
 <body>
+    <div class="navigation">
+      <div class="navigation_back-button">
+        <a href="goto://FolioNavigation/lastview">BACK</a>
+      </div>
+    </div>
+
     <article id="wrapper">
 
         <div id="info-div">
-          <div class="close info">&#215;</div>
-          <p class="label location">Location</p>
+          <div class="close info"><div class="close--position">&#215;</div></div>
+          <!--<p class="label location">Location</p>-->
           <div class="replace" id="city-holder">
 
           </div>
-          <p class="label companies">Co-op Companies <span>(click to visit website)</span>   </p>
+          <p class="label companies">Co-op Companies List <span>(click&nbsp;to&nbsp;visit&nbsp;website)</span>   </p>
           <div class="replace" id="companies-holder">
             <p id="default">We're sorry, we can't find the company names, but someone did go on co-op in this city!</p>
           </div>
         </div>
 
         <div id="filter">
-          <div class="close filter">&#215;</div>
+          <div class="close filter"><div class="close--position">&#215;</div></div>
 
           <div class="filter-special all">
-            <p class="label all"><span>Filter</span></p>
+            <h1 class="label--all">Filter</h1>
             <div id="all-div">
 
             </div>
           </div>
 
-          <div class="filter-position state">
-            <p class="label state">Filter by <span>State*</span></p>
+          <div class="filter-position state" id="stateFilter">
+            <p class="label state">Filter by <span>US&nbsp;State</span></p>
+            <div class="scrollArrows_div" id="arrowTop"></div>
             <div class="filter-selection" id="state-div">
 
             </div>
+            <div class="scrollArrows_div" id="arrowBottom"></div>
           </div>
 
-          <div class="filter-position industry">
-            <p class="label industry">Filter by <span>Industry</span></p>
+          <div class="filter-position industry" id="industryFilter">
+            <p class="label industry">Filter by <span>Industry<span></p>
+            <div class="scrollArrows_div" id="arrowTop"></div>
             <div class="filter-selection" id="industry-div">
 
             </div>
+            <div class="scrollArrows_div" id="arrowBottom"></div>
           </div>
 
           <!--<div class="filter-selection" id="state-div-past">
@@ -65,7 +79,7 @@
             <p>Filter Now</p>
           </div>
           <div class="filter-warning">
-            <p class="top">Your selection matches the current map filter</p>
+            <p class="top"><!--Your selection matches the current map filter-->The selected filter has no results</p>
             <!--<p class="bottom">Please choose a new filter selection</p>-->
           </div>
 
@@ -79,10 +93,11 @@
           <p>Filter</p>
         </div>
 
+<!--
+        <div class="button nav">
 
-        <div class="button nav"><?xml version="1.0" encoding="utf-8"?>
-      <!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+
+      <!--<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
          viewBox="0 0 60 60" enable-background="new 0 0 60 60" xml:space="preserve">
       <g>
         <rect x="0.4" y="3.7" fill="#FFFFFF" width="59.5" height="20.1"/>
@@ -98,18 +113,28 @@
       </svg>
     </div>
 
-    <div class="button help">?</div>
+
+    <div class="button help">?</div>-->
 
 
 
 
     </article>
     <script>
-        SMSMap.setWrapperSize();
-        SMSMap.initiateMap();
-        //SMSMap.drawMap();
-        //api.setUp(); //for now until the buttons work ** CHANGE
-        buttons.createButtons();
+      api.setUp();
+      back.setup();
+
+      SMSMap.setWrapperSize();
+      SMSMap.initiateMap();
+      //SMSMap.drawMap();
+      //api.setUp(); //for now until the buttons work ** CHANGE
+      //buttons.createButtons();
+
+      $ ( document ).ready( function() {
+        scrollArrows.setUp();
+        scrollArrows.getScrollArrows( "stateFilter", "state-div" );
+        scrollArrows.getScrollArrows( "industryFilter", "industry-div" );
+      });
     </script>
 </body>
 </html>

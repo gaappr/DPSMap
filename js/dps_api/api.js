@@ -18,15 +18,17 @@ var api = {
       adobeDPS.Gesture.disableNavigation();
 
       // button that I have added to the DOM to navigate back with
-      var $buttonNav = $( '.button.nav' );
+      //var $buttonNav = $( '.navigation_back-button' );
 
       // binds event listener to my button element
-      $buttonNav.attr( "onclick", "api.toggleNavUi();" );
+      //$buttonNav.attr( "onclick", "api.back();" );
 
       // binds the touch listeners to the whole HTML body
       document.body.addEventListener('touchstart', api.touchStartHandler, false);
       document.body.addEventListener('touchmove', api.touchMoveHandler, false);
     //});
+    //
+      console.log("your api is setup");
   },
 
   /**
@@ -67,15 +69,15 @@ var api = {
   },
 
   /**
-   * toggleNavUi
-   *   Function that should toggle the visibility of the apps built in navigation...
-   *   as documented in the Adobe DPS API documentation. (Added old DPS relative...
-   *   link to see if possible to just go back in the app instead of clicking nav).
+   * back
+   *   Function that takes the user back to the last page they were on
    *
    */
-  toggleNavUi: function() {
-    //toggle the navigation UI
-    adobeDPS.Gesture.toggleNavigationUI();
-    //window.location = "navto://relative/last";
-  }
+  //back: function() {
+  //  //toggle the navigation UI
+  //  //adobeDPS.Gesture.toggleNavigationUI();
+  //  window.location = "goto://FolioNavigation/lastview";
+  //}
+  //
+
 };
