@@ -44,9 +44,14 @@ $interface-color: #fff;
   transition: opacity 1s;
   width: 100%;
   z-index: 1;
+  padding-bottom: 16px;
 }
 
-html {
+html,
+body {
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -54,7 +59,6 @@ body {
   margin: 0px;
   padding: 0px;
   font-family: $font-stack;
-  overflow: hidden;
 }
 
 p {
@@ -68,15 +72,24 @@ p {
   color: white;
   display: block;
   font-size: 20px;
-  margin-bottom: 15px;
-  padding: 5px 0px;
+  padding: 5px 10px;
+  line-height: 1.2;
   text-align: center;
   text-decoration: none;
+  margin: 0 20px 4px;
+
+  .company-industry {
+    line-height: 1;
+    margin: 5px 0;
+    font-style: italic;
+    font-family: avenir-light;
+  }
 }
 
 #filter {
   @include topdiv;
 
+  padding-bottom: 0;
   height: 100%;
   max-height: none;
   opacity: 0; //for testing right now, delete later
@@ -159,7 +172,7 @@ p {
 
 
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 9px 0px;
+    padding: 9px 7px 7px;
     margin: 0px 0px 3px 3px;
   }
 
@@ -248,6 +261,10 @@ p {
 #info-div {
   @include topdiv;
 
+  //height: 75%;
+  overflow: hidden;
+  max-height: 75%;
+
   h1{
     //font-size: 34px;
     margin: 0px 15px;
@@ -270,7 +287,7 @@ p {
 
   &.companies{
     text-align: center;
-    margin: 20px 0px 10px 15px;
+    margin: 20px 15px 10px 15px;
 
     span {
       font-style: italic;
@@ -327,10 +344,14 @@ p {
 }
 
 #wrapper {
-  @include outer-container;
+  //@include outer-container;
   //background-color: $background-color;
-  color: $interface-color;
-  height: 500px;
+  //color: $interface-color;
+  //height: 500px;
+  //
+  color: #fff;
+  height: 100%;
+  width: 100%;
 
   #sms-map {
     height: 100%;
@@ -346,7 +367,7 @@ p {
     margin: 0 auto;
     text-align: center;
     background-color: rgba(255, 255, 255, 0.15);
-    padding: 9px 0px;
+    padding: 9px 5px 7px;
     //margin: 0px 0px 3px 0px;
   }
 
@@ -360,14 +381,26 @@ p {
 }
 
 
+
+
+
 #city-holder {
   //height: 50px;
   position: relative;
   margin: 25px 0 0 10px;
+  pointer-events: none;
 
   @include media($small-viewport) {
     margin-left: 0;
   }
+}
+
+#companies-holder {
+  overflow-y: scroll;
+  max-height: 260px;
+  //height: 60%;
+  //width: 100%;
+  //position: absolute;
 }
 
 @import 'partials/scrollArrows';

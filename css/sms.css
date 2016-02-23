@@ -394,14 +394,17 @@ video {
 .template_overflow-hidden {
   overflow: hidden; }
 
-html {
+html,
+body {
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
   overflow: hidden; }
 
 body {
   margin: 0px;
   padding: 0px;
-  font-family: avenir-medium;
-  overflow: hidden; }
+  font-family: avenir-medium; }
 
 @media screen and (min-width: 0px) and (max-width: 475px) {
   p {
@@ -412,10 +415,16 @@ body {
   color: white;
   display: block;
   font-size: 20px;
-  margin-bottom: 15px;
-  padding: 5px 0px;
+  padding: 5px 10px;
+  line-height: 1.2;
   text-align: center;
-  text-decoration: none; }
+  text-decoration: none;
+  margin: 0 20px 4px; }
+  .company-link .company-industry {
+    line-height: 1;
+    margin: 5px 0;
+    font-style: italic;
+    font-family: avenir-light; }
 
 #filter {
   background: rgba(0, 0, 0, 0.9);
@@ -429,6 +438,8 @@ body {
   transition: opacity 1s;
   width: 100%;
   z-index: 1;
+  padding-bottom: 16px;
+  padding-bottom: 0;
   height: 100%;
   max-height: none;
   opacity: 0;
@@ -482,7 +493,7 @@ body {
     width: calc( 50% - 3px);
     float: right;
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 9px 0px;
+    padding: 9px 7px 7px;
     margin: 0px 0px 3px 3px; }
   .filter-selection .current {
     background-color: #25a5c4; }
@@ -550,7 +561,10 @@ body {
   top: 0;
   transition: opacity 1s;
   width: 100%;
-  z-index: 1; }
+  z-index: 1;
+  padding-bottom: 16px;
+  overflow: hidden;
+  max-height: 75%; }
   #info-div h1 {
     margin: 0px 15px;
     color: white;
@@ -565,7 +579,7 @@ body {
   margin-bottom: 0px; }
   .label.companies {
     text-align: center;
-    margin: 20px 0px 10px 15px; }
+    margin: 20px 15px 10px 15px; }
     .label.companies span {
       font-style: italic; }
   .label--all {
@@ -603,15 +617,9 @@ body {
     padding: 0px 0px 0px 5px; }
 
 #wrapper {
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto;
   color: #fff;
-  height: 500px; }
-  #wrapper::after {
-    clear: both;
-    content: "";
-    display: table; }
+  height: 100%;
+  width: 100%; }
   #wrapper #sms-map {
     height: 100%;
     width: 100%; }
@@ -622,7 +630,7 @@ body {
   margin: 0 auto;
   text-align: center;
   background-color: rgba(255, 255, 255, 0.15);
-  padding: 9px 0px; }
+  padding: 9px 5px 7px; }
 #all-div .current {
   background-color: #25a5c4; }
 #all-div .past {
@@ -630,10 +638,15 @@ body {
 
 #city-holder {
   position: relative;
-  margin: 25px 0 0 10px; }
+  margin: 25px 0 0 10px;
+  pointer-events: none; }
   @media screen and (min-width: 0px) and (max-width: 475px) {
     #city-holder {
       margin-left: 0; } }
+
+#companies-holder {
+  overflow-y: scroll;
+  max-height: 260px; }
 
 .scrollArrows_div {
   width: 30px;

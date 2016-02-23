@@ -124,6 +124,7 @@ var SMSMap = {
       //zoom change event listener for entire map
       google.maps.event.addListener(SMSMap.map, "zoom_changed", function(){
         if(SMSMap.pointClicked){
+          console.log(SMSMap.pointClicked.position);
           SMSMap.map.setCenter(SMSMap.pointClicked.position);
           SMSMap.map.panBy(0, -120);
         }
@@ -379,9 +380,9 @@ var SMSMap = {
      *   A utility function to set the size of the map relative to the size of the screen it is being displayed on.
      **/
     setWrapperSize: function () {
-        var wrapperDiv = document.getElementById("wrapper");
-        wrapper.style.width = window.innerWidth + "px";
-        wrapper.style.height = window.innerHeight + "px";
+        //var wrapperDiv = document.getElementById("wrapper");
+        //wrapper.style.width = window.innerWidth + "px";
+        //wrapper.style.height = window.innerHeight + "px";
     },
 
 
@@ -422,10 +423,16 @@ var SMSMap = {
 
             for (var i = 0; i < SMSMap.coopData[arrayLoc].companies.length; i++) {
                 var companyLink = document.createElement("a");
+                var companyIndustry = document.createElement("p");
                 companyLink.className = "company-link";
                 companyLink.href = SMSMap.coopData[arrayLoc].companies[i].website;
-
                 companyLink.appendChild(document.createTextNode(SMSMap.coopData[arrayLoc].companies[i].name));
+
+                if ( SMSMap.coopData[arrayLoc].companies[i].industry ) {
+                  companyIndustry.className = "company-industry";
+                  companyIndustry.innerHTML = SMSMap.coopData[arrayLoc].companies[i].industry + " Industry";
+                  companyLink.appendChild(companyIndustry);
+                }
                 //SMSMap.addTextTouchEffect(companyLink);
                 companiesHolder.appendChild(companyLink);
             }

@@ -56,13 +56,13 @@ var api = {
     var diffVertical = api.touchStartY - touchMoveY;
 
     // detect horizontal swipe only
-    if (Math.abs(diffHorizontal) > Math.abs(diffVertical)) {
+    //if (Math.abs(diffHorizontal) > Math.abs(diffVertical)) {
       // regardless of swiping left or right,
       // call adobeDPS::Gesture::relinquishCurrentGesture()
       // this will re-enable the default navigation once and
       // allow the user to swipe to the next or previous article
-      adobeDPS.Gesture.relinquishCurrentGesture();
-    }
+      //adobeDPS.Gesture.relinquishCurrentGesture();
+    //}
     /* reset touch start values */
     api.touchStartX = null;
     api.touchStartY = null;
